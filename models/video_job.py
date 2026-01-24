@@ -1,13 +1,20 @@
 from extensions import db
 from datetime import datetime, timezone
+from sqlalchemy.sql import func
 
 class VideoJob(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     status = db.Column(db.String(50))   # pending, processing, done, failed
+    job_type = db.Column(db.String(20))  # "clipper" | "autosubs"
     progress = db.Column(db.Integer)    # 0–100
     step = db.Column(db.String(50))     # upload, transcribe, nlp, cutting
     job_dir = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime(timezone=True),default=lambda: datetime.now(timezone.utc)
-)
+    output_file = db.Column(db.String) 
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    
     result = db.Column(db.JSON)

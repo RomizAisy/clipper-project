@@ -14,6 +14,7 @@
     <p>Tokens: {{ tokens }}</p>
     <p><a href="{{url_for('payment.buytokenpage')}}">Buy Token</a></p>
     <p><a href="{{url_for('clipper.auto_clipper')}}">Clipper</a></p>
+    <p><a href="{{url_for('autosub.autosub_page')}}">Auto Subtitle</a></p>
     <a href="/logout">Logout</a>
 
     <h2>Your Video</h2>
@@ -65,6 +66,7 @@
         {% endif %}
 
     </div>
+    
     {% endfor %}
     {% else %}
 

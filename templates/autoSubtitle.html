@@ -20,12 +20,21 @@
 </head>
 
 <body>
-    <h1>Auto Clipper</h1>
+    <h1>Auto Subtitle</h1>
     <a href="{{url_for('home')}}">Home</a>
-    <form id="uploadForm" action="/clipper-video" method="POST" enctype="multipart/form-data">
+    <form id="uploadForm" method="POST" action="/add-subtitle" enctype="multipart/form-data">
+
         {{form.hidden_tag()}}
-        {{form.file()}}
-        {{form.submit()}}
+        <div>
+            {{form.file()}}
+        </div>
+        <div>
+            {{ form.subtitleStyle.label }}
+            {{ form.subtitleStyle() }}
+            {{ form.submit() }}
+        </div>
+
+
     </form>
 
     <div id="progress">
@@ -38,12 +47,12 @@
 
     {% for item in jobs %}
     {% set job = item.job %}
-    {% set clips = item.clips %}
+
 
     <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
 
         <h3>
-            Job #{{ job.user_id }}
+            Job #{{ job.id }}
             — {{ job.status }}
             — {{ job.progress }}%
         </h3>
@@ -54,31 +63,27 @@
         {% elif job.status == "failed" %}
         <p style="color:red">❌ Failed</p>
 
-        {% elif job.status == "finished" and clips %}
-        <h4>🎬 Clips</h4>
+        {% elif job.status == "finished" %}
+        <h4>🎬 Output Video</h4>
 
-        {% for clip in clips %}
-        <video width="360" controls>
-            <source src="{{ url_for('clipper.clipper_stream',
-                            job_id=job.id,
-                            filename=clip) }}" type="video/mp4">
-        </video>
+            <video controls width="600">
+    <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
+    </video>
 
         <br>
-        <a href="{{ url_for('clipper.clipper_download',
-                            job_id=job.id,
-                            filename=clip) }}">
-            Download
+
+        <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
+            Download Video
         </a>
-        {% if job.status != "processing" %}
+
+        <br><br>
+
         <button class="delete-job-btn" data-job-id="{{ job.id }}">
             🗑 Delete
         </button>
+
         {% else %}
-        <small>⏳ Processing…</small>
-        {% endif %}
-        <hr>
-        {% endfor %}
+        <small>⏳ Waiting…</small>
         {% endif %}
 
     </div>
@@ -97,7 +102,7 @@
                 const formData = new FormData(e.target);
 
                 try {
-                    const res = await fetch("/clipper-video", {
+                    const res = await fetch("/add-subtitle", {
                         method: "POST",
                         body: formData
                     });
@@ -126,7 +131,7 @@
         function startPolling(jobId) {
             const interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`/clipper-status/${jobId}`);
+                    const res = await fetch(`/autosubs-status/${jobId}`);
 
                     // 🔴 STOP if job is gone or inaccessible
                     if (res.status === 404) {
@@ -173,7 +178,11 @@
                                 : data.status === "cancelled"
                                     ? "⏹ Cancelled"
                                     : "❌ Failed";
+                        if (data.status === "finished") {
+                            setTimeout(() => location.reload(), 800);
+                        }
                     }
+                   
 
                 } catch (err) {
                     clearInterval(interval);
@@ -189,7 +198,7 @@
             if (!confirm("Are you sure you want to delete this job?")) return;
 
             try {
-                const res = await fetch(`/clipper-delete/${jobId}`, {
+                const res = await fetch(`/autosubs-delete/${jobId}`, {
                     method: "POST"
                 });
 

@@ -11,6 +11,7 @@ from models import User, Admin, Transaction
 from auth import auth_bp
 from payment import payment_bp
 from clipper import clipper_bp
+from autosubtitle import autosub_bp
 
 from helper.preview_download import get_user_jobs_with_clips
 from helper.cleanup_job import cleanup_old_jobs
@@ -28,6 +29,7 @@ app.permanent_session_lifetime = app.config["PERMANENT_SESSION_LIFETIME"]
 app.register_blueprint(auth_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(clipper_bp)
+app.register_blueprint(autosub_bp)
 
 
 

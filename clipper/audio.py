@@ -2,7 +2,7 @@ import ffmpeg
 import os
 
 def extract_audio(input_path:str, job_dir:str)->str:
-
+    os.makedirs(job_dir, exist_ok=True)
     audio_path = os.path.join(job_dir, "audio.wav")
 
     try:
