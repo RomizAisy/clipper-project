@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+
+<body>
+    <h1>Homepage</h1>
+    {% if session.user_id %}
+    <h2>Welcome, {{ session.username }}</h2>
+    <p>Tokens: {{ tokens }}</p>
+    <p><a href="{{url_for('payment.buytokenpage')}}">Buy Token</a></p>
+    <p><a href="{{url_for('clipper.auto_clipper')}}">Clipper</a></p>
+    <a href="/logout">Logout</a>
+
+    <h2>Your Video</h2>
+
+    {% for item in jobs %}
+    {% set job = item.job %}
+    {% set clips = item.clips %}
+
+    <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
+
+        <h3>
+            Job #{{ job.user_id }}
+            — {{ job.status }}
+            — {{ job.progress }}%
+        </h3>
+
+        {% if job.status == "processing" %}
+        <p>⏳ {{ job.step }}</p>
+
+        {% elif job.status == "failed" %}
+        <p style="color:red">❌ Failed</p>
+
+        {% elif job.status == "finished" and clips %}
+
+        <h4>🎬 Clips</h4>
+        {% for clip in clips %}
+        <video width="360" controls>
+            <source src="{{ url_for('clipper.clipper_stream',
+                            job_id=job.id,
+                            filename=clip) }}" type="video/mp4">
+        </video>
+
+        <br>
+        <a href="{{ url_for('clipper.clipper_download',
+                            job_id=job.id,
+                            filename=clip) }}">
+            Download
+        </a>
+        {% if job.status != "processing" %}
+        <button class="delete-job-btn" data-job-id="{{ job.id }}">
+            🗑 Delete
+        </button>
+        {% else %}
+        <small>⏳ Processing…</small>
+        {% endif %}
+        <hr>
+
+        {% endfor %}
+        {% endif %}
+
+    </div>
+    {% endfor %}
+    {% else %}
+
+    <h2>Welcome, Guest</h2>
+    <p>Tokens: {{ tokens }}</p>
+    <a href="{{url_for('auth.login')}}">Login</a>
+    <a href="{{url_for('auth.register')}}">Register</a>
+
+    {% endif %}
+    <p><a href="{{url_for('auth.admin')}}">Admin</a></p>
+
+
+
+    <script>
+        document.addEventListener("click", async (e) => {
+            if (!e.target.classList.contains("delete-job-btn")) return;
+
+            const jobId = e.target.dataset.jobId;
+
+            if (!confirm("Are you sure you want to delete this job?")) return;
+
+            try {
+                const res = await fetch(`/clipper-delete/${jobId}`, {
+                    method: "POST"
+                });
+
+                if (!res.ok) {
+                    alert("Failed to delete job");
+                    return;
+                }
+
+                // ✅ Remove job from UI immediately
+                e.target.closest(".job-card").remove();
+
+            } catch (err) {
+                console.error(err);
+                alert("Error deleting job");
+            }
+        });
+    </script>
+
+</body>
+
+</html>

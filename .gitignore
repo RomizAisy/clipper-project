@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+loginenv/
+venv/
+.env
+
+# Flask
+instance/
+
+# Media / outputs
+uploads/
+outputs/
+*.mp4
+*.mov
+*.avi

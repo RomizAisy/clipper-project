@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Buy Token</title>
+</head>
+
+<body>
+    <button onclick="buy('starter')">Buy Starter (50 tokens)</button>
+    <button onclick="buy('pro')">Buy Pro (200 tokens)</button>
+
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ client_key }}"></script>
+
+    <script>
+        function buy(packageName) {
+            fetch("/create-transaction", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ package: packageName })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.snap_token) {
+                        snap.pay(data.snap_token, {  // <-- pass token, not URL
+                            onSuccess: function (result) {
+                                window.location.href = "/payment-success";
+                            },
+                            onPending: function (result) {
+                                window.location.href = "/payment-pending";
+                            },
+                            onError: function (result) {
+                                alert("Payment failed");
+                            }
+                        });
+                    } else {
+                        alert("Payment error");
+                    }
+                });
+        }
+    </script>
+</body>
+
+</html>
