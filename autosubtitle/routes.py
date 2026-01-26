@@ -16,7 +16,7 @@ from autosubtitle.burn_sub import burn_subtitles
 from extensions import db
 from models import VideoJob
 
-from helper.preview_download import get_user_jobs_with_clips
+from helper.preview_download import get_user_jobs_with_outputs
 
 from flask import current_app
 
@@ -29,7 +29,7 @@ def autosub_page():
         return redirect("/login")
 
     form = AutosubFileForm()
-    jobs = get_user_jobs_with_clips(session["user_id"])
+    jobs = get_user_jobs_with_outputs(session["user_id"])
     
     return render_template(
         "autoSubtitle.html",
@@ -143,6 +143,7 @@ def process_autosubs_background(app, job_id, video_path, style):
             os.makedirs(output_dir, exist_ok=True)
 
             output_path = os.path.join(output_dir, "subtitled.mp4")
+            job.output_file = output_path
 
             burn_subtitles(video_path, ass_path, output_path)
 

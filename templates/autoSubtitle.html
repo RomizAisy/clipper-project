@@ -63,21 +63,16 @@
         {% elif job.status == "failed" %}
         <p style="color:red">❌ Failed</p>
 
-        {% elif job.status == "finished" %}
+        {% elif job.output_file %}
         <h4>🎬 Output Video</h4>
-
-            <video controls width="600">
-    <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
-    </video>
+        <video controls width="600">
+            <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
+        </video>
 
         <br>
-
         <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
-            Download Video
+            Download Subtitled Video
         </a>
-
-        <br><br>
-
         <button class="delete-job-btn" data-job-id="{{ job.id }}">
             🗑 Delete
         </button>
@@ -182,7 +177,7 @@
                             setTimeout(() => location.reload(), 800);
                         }
                     }
-                   
+
 
                 } catch (err) {
                     clearInterval(interval);
@@ -198,7 +193,7 @@
             if (!confirm("Are you sure you want to delete this job?")) return;
 
             try {
-                const res = await fetch(`/autosubs-delete/${jobId}`, {
+                const res = await fetch(`/clipper-delete/${jobId}`, {
                     method: "POST"
                 });
 

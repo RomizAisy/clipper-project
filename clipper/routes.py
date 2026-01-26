@@ -10,7 +10,7 @@ from clipper.whisper import transcribe_audio
 from clipper.nlp import merge_segments, detect_topic_changes, enforce_min_duration
 from clipper.clipper import cut_topic_clips
 
-from helper.preview_download import get_user_jobs_with_clips
+from helper.preview_download import get_user_jobs_with_outputs
 
 from flask import current_app
 
@@ -26,7 +26,7 @@ def auto_clipper():
         return redirect("/login")
 
     form = ClipperFileForm()
-    jobs = get_user_jobs_with_clips(session["user_id"])
+    jobs = get_user_jobs_with_outputs(session["user_id"])
     
     return render_template(
         "autoClipper.html",

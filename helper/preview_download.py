@@ -1,29 +1,26 @@
 import os
 from models import VideoJob
 
-def get_user_jobs_with_clips(user_id):
-    jobs = (
-        VideoJob.query
-        .filter_by(user_id=user_id)
-        .order_by(VideoJob.id.desc())
-        .all()
-    )
+def get_user_jobs_with_outputs(user_id):
+    jobs = VideoJob.query.filter_by(user_id=user_id).order_by(VideoJob.id.desc()).all()
 
-    result = []
+    results = []
 
     for job in jobs:
-        clips_dir = os.path.join(job.job_dir, "clips")
-        clips = []
+        clips_dir = os.path.join(job.job_dir, "clips") if job.job_dir else None
 
-        if os.path.exists(clips_dir):
-            clips = sorted(
+        clips = []
+        if clips_dir and os.path.exists(clips_dir):
+            clips = [
                 f for f in os.listdir(clips_dir)
                 if f.endswith(".mp4")
-            )
+            ]
 
-        result.append({
+        results.append({
             "job": job,
-            "clips": clips
+            "clips": clips,
+            "autosub": job.output_file
         })
 
-    return result
+    return results
+

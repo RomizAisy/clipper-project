@@ -13,7 +13,7 @@ from payment import payment_bp
 from clipper import clipper_bp
 from autosubtitle import autosub_bp
 
-from helper.preview_download import get_user_jobs_with_clips
+from helper.preview_download import get_user_jobs_with_outputs
 from helper.cleanup_job import cleanup_old_jobs
 
 from dotenv import load_dotenv, find_dotenv
@@ -47,7 +47,7 @@ def home():
         cleanup_old_jobs(days=5)
         if user:
             tokens = user.tokens
-        jobs = get_user_jobs_with_clips(session["user_id"])
+        jobs = get_user_jobs_with_outputs(session["user_id"])
         
     return render_template("home.html", user=user, tokens=tokens, jobs = jobs)
 

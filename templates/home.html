@@ -26,25 +26,34 @@
     <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
 
         <h3>
-            Job #{{ job.user_id }}
-            — {{ job.status }}
-            — {{ job.progress }}%
+            Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
         </h3>
 
         {% if job.status == "processing" %}
         <p>⏳ {{ job.step }}</p>
+        {% endif %}
 
-        {% elif job.status == "failed" %}
-        <p style="color:red">❌ Failed</p>
+        {% if job.output_file %}
+        <h4>📝 Auto Subtitled Video</h4>
 
-        {% elif job.status == "finished" and clips %}
+        <video width="360" controls>
+            <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
+        </video>
 
+        <br>
+        <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
+            Download Subtitled Video
+        </a>
+        {% endif %}
+
+        {% if clips %}
         <h4>🎬 Clips</h4>
+
         {% for clip in clips %}
         <video width="360" controls>
             <source src="{{ url_for('clipper.clipper_stream',
                             job_id=job.id,
-                            filename=clip) }}" type="video/mp4">
+                            filename=clip) }}">
         </video>
 
         <br>
@@ -53,20 +62,18 @@
                             filename=clip) }}">
             Download
         </a>
+        <hr>
+        {% endfor %}
+        {% endif %}
+
         {% if job.status != "processing" %}
         <button class="delete-job-btn" data-job-id="{{ job.id }}">
             🗑 Delete
         </button>
-        {% else %}
-        <small>⏳ Processing…</small>
-        {% endif %}
-        <hr>
-
-        {% endfor %}
         {% endif %}
 
     </div>
-    
+
     {% endfor %}
     {% else %}
 
