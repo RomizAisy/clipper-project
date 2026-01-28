@@ -4,7 +4,7 @@ from wtforms.validators import InputRequired
 
 
 class AutosubFileForm(FlaskForm):
-    subtitleStyle = SelectField(u'Subtitle Style', choices=[('default', 'Default'),('tiktok', 'Tiktok')], default= 'default'
+    subtitleStyle = SelectField(u'Subtitle Style', choices=[('default', 'Default'),('pop', 'Pop'),('tiktok', 'Tiktok')], default= 'default'
 
     )
     file = FileField("File" , validators=[InputRequired()])

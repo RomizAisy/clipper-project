@@ -73,14 +73,15 @@
         <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
             Download Subtitled Video
         </a>
-        <button class="delete-job-btn" data-job-id="{{ job.id }}">
-            🗑 Delete
-        </button>
+        
 
         {% else %}
         <small>⏳ Waiting…</small>
+        
         {% endif %}
-
+        <button class="delete-job-btn" data-job-id="{{ job.id }}">
+            🗑 Delete
+        </button>
     </div>
     {% endfor %}
 

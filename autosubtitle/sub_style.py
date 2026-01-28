@@ -22,17 +22,17 @@ SUBTITLE_STYLES = {
         "MarginV": 40
     },
 
-    "bold_center": {
-        "Fontname": "Montserrat",
-        "Fontsize": 24,
+    "pop": {
+        "Fontname": "Arial Black",
+        "Fontsize": 22,
         "PrimaryColour": "&H00FFFFFF",
         "OutlineColour": "&H00000000",
         "BackColour": "&H00000000",
         "Bold": 1,
-        "Outline": 3,
+        "Outline": 4,
         "Shadow": 0,
         "Alignment": 2,
-        "MarginV": 40
+        "MarginV":40
     },
 
     "tiktok": {
@@ -142,7 +142,7 @@ def build_pop_karaoke(words):
             "{"
             f"\\k{duration_cs}"              # sequential timing
             "\\c&H0000FFFF&"                 # active yellow
-            "\\fscx130\\fscy130"             # pop start
+            "\\fscx150\\fscy150"             # pop start
             f"\\t(0,{pop_time},\\fscx100\\fscy100)"
             "}"
             f"{text} "
@@ -170,6 +170,53 @@ def pop_frames_from_words(segment, max_words=3):
         })
 
     return frames
+
+
+#SEQUENTIAL POP
+
+def sequential_pop_frames(segment, max_words=3):
+    frames = []
+    words = segment.words
+
+    for i in range(0, len(words), max_words):
+        chunk = words[i:i + max_words]
+
+        start = chunk[0].start
+        end   = chunk[-1].end
+
+        current_time = 0
+        line = ""
+
+        for w in chunk:
+            dur_ms = int((w.end - w.start) * 1000)
+
+            pop_time = min(120, dur_ms // 3)
+            settle_time = pop_time + 160
+
+            text = w.word.strip("{}").upper().replace(".", "").replace(",", "")
+
+            anim = (
+                f"\\t({current_time},{current_time+1},\\c&H00FFFF&)"   # switch to yellow instantly
+                f"\\t({current_time},{current_time+pop_time},\\fscx115\\fscy115)"
+                f"\\t({current_time+pop_time},{current_time+settle_time},\\fscx100\\fscy100\\c&HFFFFFF&)"
+            )
+
+            line += (
+                "{\\c&HFFFFFF&\\fscx100\\fscy100}"
+                f"{{{anim}}}{text} "
+            )
+
+
+            current_time += dur_ms
+
+        frames.append({
+            "start": start,
+            "end": end,
+            "text": line.strip()
+        })
+
+    return frames
+
 
 def write_ass(segments, ass_path, style_name="default"):
     style = SUBTITLE_STYLES.get(style_name, SUBTITLE_STYLES["default"])
@@ -201,6 +248,18 @@ def write_ass(segments, ass_path, style_name="default"):
 
                     f.write(
                         f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{text}\n"
+                    )
+
+            elif style_name == "pop":
+
+                frames = sequential_pop_frames(s, max_words=2)
+
+                for frame in frames:
+                    start = format_ass_time(frame["start"])
+                    end   = format_ass_time(frame["end"])
+
+                    f.write(
+                        f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{frame['text']}\n"
                     )
 
             # 🧘 Default styles = plain subtitles
