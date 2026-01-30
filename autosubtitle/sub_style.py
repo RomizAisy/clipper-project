@@ -19,7 +19,8 @@ SUBTITLE_STYLES = {
         "Outline": 2,
         "Shadow": 1,
         "Alignment": 2,
-        "MarginV": 40
+        "MarginV": 40,
+        "BorderStyle": 1 
     },
 
     "pop": {
@@ -32,21 +33,36 @@ SUBTITLE_STYLES = {
         "Outline": 4,
         "Shadow": 0,
         "Alignment": 2,
-        "MarginV":40
+        "MarginV":40,
+        "BorderStyle": 1 
+    },
+    "boxed": {
+        "Fontname": "Roboto",
+        "Fontsize": 18,
+        "PrimaryColour": "&H00000000",
+        "OutlineColour": "&H00E0E0E0",
+        "BackColour": "&H00E0E0E0",   # khusus borderbackground Outline dan BackColor harus sama, kalau tidak ntar default
+        "Bold": 1,
+        "Outline": 4,                 # box padding
+        "Shadow": 0,
+        "Alignment": 2,
+        "MarginV": 40,
+        "BorderStyle": 4
     },
 
     "tiktok": {
-    "Fontname": "Arial Black",
-    "Fontsize": 22,
-    "PrimaryColour": "&H00FFFFFF",
-    "OutlineColour": "&H00000000",
-    "BackColour": "&H00000000",
-    "Bold": 1,
-    "Outline": 4,
-    "Shadow": 0,
-    "Alignment": 2,
-    "MarginV":40
-}
+        "Fontname": "Arial Black",
+        "Fontsize": 22,
+        "PrimaryColour": "&H00FFFFFF",
+        "OutlineColour": "&H00000000",
+        "BackColour": "&H00000000",
+        "Bold": 1,
+        "Outline": 4,
+        "Shadow": 0,
+        "Alignment": 2,
+        "MarginV":40,
+        "BorderStyle": 1 
+    }
 }
 
 
@@ -58,6 +74,7 @@ def format_ass_time(seconds):
 
 def build_ass_style(name, style):
     margin_v = style.get("MarginV", 40)
+    border = style.get("BorderStyle", 1)
     return (
         f"Style: {name},"
         f"{style['Fontname']},"
@@ -67,91 +84,15 @@ def build_ass_style(name, style):
         f"{style['OutlineColour']},"
         f"{style['BackColour']},"
         f"{style['Bold']},0,0,0,"
-        f"100,100,0,0,1,"
+        f"100,100,0,0,{border},"
         f"{style['Outline']},"
         f"{style['Shadow']},"
         f"{style['Alignment']},"
         f"40,40,{margin_v},1\n"
     )
 
-def frames_from_word_timestamps(segment, max_words=1):
-    frames = []
-    words = segment.words
-
-    for i in range(0, len(words), max_words):
-        chunk = words[i:i + max_words]
-
-        start = chunk[0].start
-        end   = chunk[-1].end
-        text  = " ".join(w.word for w in chunk)
-
-        frames.append({
-            "start": start,
-            "end": end,
-            "text": text
-        })
-
-    return frames
-
-def build_karaoke_line(words):
-    """
-    words = list of word objects with .word .start .end
-    """
-    line = ""
-
-    for w in words:
-        duration_cs = int((w.end - w.start) * 50)
-        duration_cs = max(duration_cs, 8)  # safety
-
-        text = w.word.upper().replace("{", "").replace("}", "")
-        line += f"{{\\k{duration_cs}}}{text} "
-
-    return line.strip()
-
-def karaoke_frames_from_words(segment, max_words=2):
-    frames = []
-    words = segment.words
-
-    for i in range(0, len(words), max_words):
-        chunk = words[i:i + max_words]
-
-        start = chunk[0].start
-        end   = chunk[-1].end
-        text  = build_karaoke_line(chunk)
-
-        frames.append({
-            "start": start,
-            "end": end,
-            "text": text
-        })
-
-    return frames
-
-def build_pop_karaoke(words):
-    line = ""
-
-    for w in words:
-        duration_ms = int((w.end - w.start) * 1000)
-        duration_cs = max(int(duration_ms / 10), 6)
-
-        pop_time = min(70, int(duration_ms * 0.25))
-
-        text = w.word.upper().replace("{", "").replace("}", "")
-
-        line += (
-            "{"
-            f"\\k{duration_cs}"              # sequential timing
-            "\\c&H0000FFFF&"                 # active yellow
-            "\\fscx150\\fscy150"             # pop start
-            f"\\t(0,{pop_time},\\fscx100\\fscy100)"
-            "}"
-            f"{text} "
-        )
-
-    return line.strip()
-
-
-def pop_frames_from_words(segment, max_words=3):
+#+++++++++++++++++++++++TIKTOK STYLE+++++++++++++++++++++++++++++++++++++#
+def tiktok_style(segment, max_words=3):
     frames = []
     words = segment.words
 
@@ -161,20 +102,39 @@ def pop_frames_from_words(segment, max_words=3):
         start = chunk[0].start
         end   = chunk[-1].end
 
-        text = build_pop_karaoke(chunk)
+        current_time = 0
+        line = ""
+
+        for w in chunk:
+            dur_ms = int((w.end - w.start) * 1000)
+
+            pop_time = min(120, dur_ms // 3)
+
+            text = w.word.strip("{}").upper().replace(".", "").replace(",", "")
+
+            anim = (
+                f"\\t({current_time},{current_time+1},\\c&HFFFFFF&)"   # switch to ---- instantly
+                f"\\t({current_time},{current_time+pop_time},\\fscx100\\fscy100\\c&H00FF00&))"
+            )
+
+            line += (
+                "{\\c&HFFFFFF&\\fscx100\\fscy100}"
+                f"{{{anim}}}{text} "
+            )
+
+
+            current_time += dur_ms
 
         frames.append({
             "start": start,
             "end": end,
-            "text": text
+            "text": line.strip()
         })
 
     return frames
 
-
-#SEQUENTIAL POP
-
-def sequential_pop_frames(segment, max_words=3):
+#+++++++++++++++++++++++SEQUENTIAL POP+++++++++++++++++++++++++++++++++++++#
+def pop_style(segment, max_words=3):
     frames = []
     words = segment.words
 
@@ -217,11 +177,54 @@ def sequential_pop_frames(segment, max_words=3):
 
     return frames
 
+#+++++++++++++++++++++++BOXED+++++++++++++++++++++++++++++++++++++#
+def ass_rect(w, h, color):
+    return f"{{\\p1\\c{color}}}m 0 0 l {w} 0 {w} {h} 0 {h}{{\\p0}}"
+
+def boxed_style(segment, max_words=3):
+    frames = []
+    words = segment.words
+
+    for i in range(0, len(words), max_words):
+        chunk = words[i:i + max_words]
+
+        start = chunk[0].start
+        end   = chunk[-1].end
+
+        current_time = 0
+        line = ""
+
+        for w in chunk:
+            dur_ms = int((w.end - w.start) * 1000)
+            pop_time = min(120, dur_ms // 3)
+
+            text = w.word.strip("{}").replace(".", "").replace(",", "")
+
+            anim = (
+                f"\\c&H00B0B0B0&"  # active word 
+                f"\\t({current_time},{current_time+pop_time},\\fscx100\\fscy100,\\c&H00000000&)"
+                f"\\t({current_time+pop_time},{current_time+pop_time+120},\\fscx100\\fscy100)"
+                f"\\t({current_time+pop_time+120},{current_time+pop_time+121})"
+            )
+
+            line += f" {{{anim}}}{text}"
+
+            current_time += dur_ms
+
+        frames.append({
+            "start": start,
+            "end": end,
+            "text": line.strip()
+        })
+
+    return frames
+
 
 def write_ass(segments, ass_path, style_name="default"):
     style = SUBTITLE_STYLES.get(style_name, SUBTITLE_STYLES["default"])
 
     with open(ass_path, "w", encoding="utf-8") as f:
+        
         f.write("[Script Info]\nScriptType: v4.00+\n\n")
         f.write("[V4+ Styles]\n")
         f.write("Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,"
@@ -237,22 +240,9 @@ def write_ass(segments, ass_path, style_name="default"):
             if not s.words:
                 continue
 
-            # 🔥 TikTok = karaoke + pop
+            # TikTok = karaoke
             if style_name == "tiktok":
-                frames = pop_frames_from_words(s, max_words=3)
-
-                for frame in frames:
-                    start = format_ass_time(frame["start"])
-                    end   = format_ass_time(frame["end"])
-                    text  = frame["text"]
-
-                    f.write(
-                        f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{text}\n"
-                    )
-
-            elif style_name == "pop":
-
-                frames = sequential_pop_frames(s, max_words=2)
+                frames = tiktok_style(s, max_words=2)
 
                 for frame in frames:
                     start = format_ass_time(frame["start"])
@@ -262,7 +252,33 @@ def write_ass(segments, ass_path, style_name="default"):
                         f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{frame['text']}\n"
                     )
 
-            # 🧘 Default styles = plain subtitles
+            # pop
+            elif style_name == "pop":
+
+                frames = pop_style(s, max_words=2)
+
+                for frame in frames:
+                    start = format_ass_time(frame["start"])
+                    end   = format_ass_time(frame["end"])
+
+                    f.write(
+                        f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{frame['text']}\n"
+                    )
+
+            #boxed
+            elif style_name == "boxed":
+
+                frames = boxed_style(s, max_words=3)
+
+                for frame in frames:
+                    start = format_ass_time(frame["start"])
+                    end   = format_ass_time(frame["end"])
+
+                    f.write(
+                        f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{frame['text']}\n"
+                    )
+
+            # Default styles = plain subtitles
             else:
                 start = format_ass_time(s.start)
                 end   = format_ass_time(s.end)
