@@ -9,7 +9,20 @@ model = WhisperModel(
 
 
 SUBTITLE_STYLES = {
-    "default": {
+    "default_movie": {
+        "Fontname": "Arial",
+        "Fontsize": 12,
+        "PrimaryColour": "&H00FFFFFF",
+        "OutlineColour": "&H00000000",
+        "BackColour": "&H64000000",
+        "Bold": 0,
+        "Outline": 2,
+        "Shadow": 1,
+        "Alignment": 2,
+        "MarginV": 40,
+        "BorderStyle": 1 
+    },
+    "default_portrait": {
         "Fontname": "Arial",
         "Fontsize": 12,
         "PrimaryColour": "&H00FFFFFF",
@@ -90,6 +103,29 @@ def build_ass_style(name, style):
         f"{style['Alignment']},"
         f"40,40,{margin_v},1\n"
     )
+#+++++++++++++++++++++++DEFAULT POTRAIT STYLE+++++++++++++++++++++++++++++++++++++#
+def default_portrait(segment, max_words=3):
+    frames = []
+    words = segment.words
+
+    for i in range(0, len(words), max_words):
+        chunk = words[i:i + max_words]
+
+        start = chunk[0].start
+        end   = chunk[-1].end
+
+        line = " ".join(
+            w.word.strip("{}").replace(".", "").replace(",", "")
+            for w in chunk
+        )
+
+        frames.append({
+            "start": start,
+            "end": end,
+            "text": line
+        })
+
+    return frames
 
 #+++++++++++++++++++++++TIKTOK STYLE+++++++++++++++++++++++++++++++++++++#
 def tiktok_style(segment, max_words=3):
@@ -220,8 +256,8 @@ def boxed_style(segment, max_words=3):
     return frames
 
 
-def write_ass(segments, ass_path, style_name="default"):
-    style = SUBTITLE_STYLES.get(style_name, SUBTITLE_STYLES["default"])
+def write_ass(segments, ass_path, style_name="default_portrait"):
+    style = SUBTITLE_STYLES.get(style_name, SUBTITLE_STYLES["default_portrait"])
 
     with open(ass_path, "w", encoding="utf-8") as f:
         
@@ -243,6 +279,17 @@ def write_ass(segments, ass_path, style_name="default"):
             # TikTok = karaoke
             if style_name == "tiktok":
                 frames = tiktok_style(s, max_words=2)
+
+                for frame in frames:
+                    start = format_ass_time(frame["start"])
+                    end   = format_ass_time(frame["end"])
+
+                    f.write(
+                        f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{frame['text']}\n"
+                    )
+
+            elif style_name == "default_portrait":
+                frames = default_portrait(s, max_words=3)
 
                 for frame in frames:
                     start = format_ass_time(frame["start"])
