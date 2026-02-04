@@ -43,7 +43,7 @@
     <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
 
         <h3>
-            Job #{{ job.user_id }}
+            Job #{{ job.id }}
             — {{ job.status }}
             — {{ job.progress }}%
         </h3>
@@ -71,12 +71,14 @@
             Download
         </a>
         {% if job.status != "processing" %}
+        
+        {% else %}
+        <small>⏳ Processing…</small>
+        
+        {% endif %}
         <button class="delete-job-btn" data-job-id="{{ job.id }}">
             🗑 Delete
         </button>
-        {% else %}
-        <small>⏳ Processing…</small>
-        {% endif %}
         <hr>
         {% endfor %}
         {% endif %}
