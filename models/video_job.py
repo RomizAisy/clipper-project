@@ -10,6 +10,7 @@ class VideoJob(db.Model):
     progress = db.Column(db.Integer)    # 0–100
     step = db.Column(db.String(50))     # upload, transcribe, nlp, cutting
     job_dir = db.Column(db.String(255))
+    original_filename=db.Column(db.String(255))
     output_file = db.Column(db.String) 
     created_at = db.Column(
         db.DateTime(timezone=True),

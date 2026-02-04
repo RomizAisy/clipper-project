@@ -24,16 +24,28 @@
     <a href="{{url_for('home')}}">Home</a>
     <form id="uploadForm" method="POST" action="/add-subtitle" enctype="multipart/form-data">
 
-        {{form.hidden_tag()}}
-        <div>
-            {{form.file()}}
-        </div>
-        <div>
-            {{ form.subtitleStyle.label }}
-            {{ form.subtitleStyle() }}
-            {{ form.submit() }}
+        {{ form.hidden_tag() }}
+
+        <div class="field">
+            {{ form.file.label }}
+            {{ form.file() }}
         </div>
 
+        <div class="divider">OR</div>
+
+        <div class="field">
+            {{ form.video_url.label }}
+            {{ form.video_url(placeholder="Paste YouTube / TikTok link") }}
+        </div>
+
+        <div class="field">
+            {{ form.subtitleStyle.label }}
+            {{ form.subtitleStyle() }}
+        </div>
+
+        <div class="field">
+            {{ form.submit(class="btn") }}
+        </div>
 
     </form>
 
@@ -65,7 +77,7 @@
 
     {% elif job.output_file %}
         <h4>📝 Auto Subtitled Video</h4>
-        <video controls width="360">
+        <video controls width="360" height="240">
             <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
         </video>
 
@@ -77,7 +89,7 @@
     {% elif job.status == "finished" and clips %}
         <h4>🎬 Clips ready</h4>
          {% for clip in clips %}
-        <video width="360" controls>
+        <video controls width="360" height="240">
             <source src="{{ url_for('clipper.clipper_stream',
                             job_id=job.id,
                             filename=clip) }}">

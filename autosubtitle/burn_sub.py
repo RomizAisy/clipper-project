@@ -8,13 +8,16 @@ def burn_subtitles(video_path, ass_path, output_path):
     ass_path = ass_path.replace("\\", "/").replace(":", "\\:")
 
     cmd = [
-        "ffmpeg",
-        "-y",
-        "-i", video_path,
-        "-vf", f"subtitles=filename='{ass_path}'",
-        "-c:a", "copy",
-        output_path
-    ]
+    "ffmpeg",
+    "-y",
+    "-i", video_path,
+    "-vf", f"subtitles=filename='{ass_path}'",
+    "-c:v", "libx264",
+    "-crf", "18",
+    "-preset", "slow",
+    "-c:a", "copy",
+    output_path
+]
 
     print("FFMPEG CMD:")
     print(" ".join(cmd))
