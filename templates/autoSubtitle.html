@@ -46,26 +46,26 @@
     <h2>Your Video</h2>
 
     {% for item in jobs %}
-    {% set job = item.job %}
+{% set job = item.job %}
+{% set clips = item.clips %}
 
+<div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
 
-    <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
+    <h3>
+        Job #{{ job.id }}
+        — {{ job.status }}
+        — {{ job.progress }}%
+    </h3>
 
-        <h3>
-            Job #{{ job.id }}
-            — {{ job.status }}
-            — {{ job.progress }}%
-        </h3>
-
-        {% if job.status == "processing" %}
+    {% if job.status == "processing" %}
         <p>⏳ {{ job.step }}</p>
 
-        {% elif job.status == "failed" %}
+    {% elif job.status == "failed" %}
         <p style="color:red">❌ Failed</p>
 
-        {% elif job.output_file %}
-        <h4>🎬 Output Video</h4>
-        <video controls width="600">
+    {% elif job.output_file %}
+        <h4>📝 Auto Subtitled Video</h4>
+        <video controls width="360">
             <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
         </video>
 
@@ -73,17 +73,37 @@
         <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
             Download Subtitled Video
         </a>
-        
 
-        {% else %}
+    {% elif job.status == "finished" and clips %}
+        <h4>🎬 Clips ready</h4>
+         {% for clip in clips %}
+        <video width="360" controls>
+            <source src="{{ url_for('clipper.clipper_stream',
+                            job_id=job.id,
+                            filename=clip) }}">
+        </video>
+
+        <br>
+        <a href="{{ url_for('clipper.clipper_download',
+                            job_id=job.id,
+                            filename=clip) }}">
+            Download
+        </a>
+        <hr>
+        {% endfor %}
+
+    {% else %}
         <small>⏳ Waiting…</small>
-        
-        {% endif %}
-        <button class="delete-job-btn" data-job-id="{{ job.id }}">
-            🗑 Delete
-        </button>
-    </div>
-    {% endfor %}
+    {% endif %}
+
+    <br><br>
+    <button class="delete-job-btn" data-job-id="{{ job.id }}">
+        🗑 Delete
+    </button>
+
+</div>
+{% endfor %}
+
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
