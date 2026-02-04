@@ -11,6 +11,7 @@ class User(db.Model):
     email = db.Column(db.String(100), unique = True, nullable = False)
     password_hash = db.Column(db.String(200), nullable = False)
     tokens = db.Column(db.Integer, default = 0)
+    is_verified = db.Column(db.Boolean, default=False)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)

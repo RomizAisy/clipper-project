@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField,EmailField, validators
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email
 
 
 #USER LOGIN FORM
@@ -11,7 +11,7 @@ class LoginForm(FlaskForm):
 #USER REGISTER FORM
 class RegisterForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    email = EmailField('Email', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
 
 #ADMINs REGISTER FORM

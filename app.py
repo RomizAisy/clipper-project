@@ -4,7 +4,7 @@ from flask import render_template, redirect, request, session, flash, jsonify
 
 from config import Config
 
-from extensions import db, migrate
+from extensions import db, migrate, mail
 
 from models import User, Admin, Transaction
 
@@ -20,6 +20,8 @@ from dotenv import load_dotenv, find_dotenv
 
 
 
+
+
 load_dotenv(find_dotenv())
 
 app = Flask(__name__)
@@ -31,10 +33,9 @@ app.register_blueprint(payment_bp)
 app.register_blueprint(clipper_bp)
 app.register_blueprint(autosub_bp)
 
-
-
 db.init_app(app)
 migrate.init_app(app, db)
+mail.init_app(app)
 
 @app.route('/')
 def home():
@@ -50,6 +51,8 @@ def home():
         jobs = get_user_jobs_with_outputs(session["user_id"])
         
     return render_template("home.html", user=user, tokens=tokens, jobs = jobs)
+
+
 
 if __name__ == "__main__":
     app.run(
