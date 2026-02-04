@@ -46,7 +46,7 @@ def detect_topic_changes(chunks, threshold=0.65):
         similarity = util.cos_sim(
             embeddings[i-1], embeddings[i]
         ).item()
-
+        print(similarity)
         if similarity < threshold:
             clips.append(current)
             current = chunks[i].copy()

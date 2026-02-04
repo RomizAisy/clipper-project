@@ -14,6 +14,8 @@ from helper.preview_download import get_user_jobs_with_outputs
 
 from flask import current_app
 
+from yt_dlp import YoutubeDL
+
 from extensions import db
 from models import VideoJob
 
@@ -43,6 +45,9 @@ def clipper():
 
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400
+    
+    if not form.file.data and not form.video_url.data:
+        return jsonify({"error": "Upload a file or paste a video link"}), 400
 
     # Temp Directory
     BASE_TEMP_DIR = os.path.join(os.getcwd(), "uploads", "temp")
@@ -50,10 +55,20 @@ def clipper():
     job_dir = tempfile.mkdtemp(prefix="ffmpeg_", dir=BASE_TEMP_DIR)
 
     # Save Uploaded Video
-    file = form.file.data
-    input_filename = secure_filename(file.filename)
-    save_path = os.path.join(job_dir, input_filename)
-    file.save(save_path)
+    if form.file.data:
+        file = form.file.data
+        input_filename = secure_filename(file.filename)
+        save_path = os.path.join(job_dir, input_filename)
+        file.save(save_path)
+    
+    elif form.video_url.data:
+        save_path = download_from_link(
+            form.video_url.data,
+            job_dir
+        )
+    
+    else:
+        return jsonify({"error": "No video provided"}), 400
 
     # Create VideoJob in DB immediately
     job = VideoJob(
@@ -77,6 +92,35 @@ def clipper():
         daemon=True
     ).start()
     return jsonify({"job_id": job_id})
+
+MAX_SECONDS = 60 * 60   #60 minutes 
+
+def download_from_link(url, job_dir):
+    output = os.path.join(job_dir, "input.%(ext)s")
+
+    ydl_opts = {
+        "format": "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[ext=mp4]",
+        "outtmpl": output,
+        "quiet": True,
+        "noplaylist": True,
+        "merge_output_format": "mp4"
+    }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        # Get info WITHOUT downloading first
+        info = ydl.extract_info(url, download=False)
+
+        duration = info.get("duration", 0)
+
+        if duration > MAX_SECONDS:
+            mins = duration // 60
+            raise ValueError(f"Video too long ({mins} minutes). Max allowed is X minutes.")
+
+        # ⬇ Now download if safe
+        info = ydl.extract_info(url, download=True)
+        ext = info.get("ext", "mp4")
+
+    return os.path.join(job_dir, f"input.{ext}")
 
 def fake_progress(app, job_id, start, end, duration=60):
     with app.app_context():
@@ -122,12 +166,11 @@ def process_video_background(app, job_id, save_path, job_dir):
             job.step = "transcribed"
             db.session.commit()
 
-            merged = merge_segments(segments)
+            merged = merge_segments(segments, max_gap=0.6)
             job.progress = 70
             job.step = "analyzing topics"
             db.session.commit()
-            topic_clips = detect_topic_changes(merged, threshold=0.65)
-            topic_clips = enforce_min_duration(topic_clips, min_duration=30.0)
+            topic_clips = detect_topic_changes(merged, threshold=0.85)
 
             job.progress = 85
             job.step = "cutting clips"
