@@ -1,6 +1,6 @@
 from sentence_transformers import SentenceTransformer, util
 
-def merge_segments(segments, max_gap=1.5):
+def merge_segments(segments, max_gap=0.6):
     merged = []
     current = None
 

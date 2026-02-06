@@ -11,7 +11,12 @@ class AutosubFileForm(FlaskForm):
                                          ('tiktok', 'Tiktok'),
                                          ('boxed','Boxed')], 
                                          default= 'default_portrait'
-
+    )
+    aspectRatio = SelectField(u'Aspect Ratio', 
+                                choices=[('portrait', 'Portrait'),
+                                         ('landscape', 'Landscape'),
+                                         ('original', 'Original')], 
+                                         default= 'original'
     )
     file = FileField("File" , validators=[Optional()])
     video_url  = URLField(

@@ -3,7 +3,7 @@ from wtforms import FileField, SubmitField, URLField, SelectField
 from wtforms.validators import InputRequired, URL, Optional
 
 
-class ClipperFileForm(FlaskForm):
+class AspectFileForm(FlaskForm):
     file = FileField("File" , validators=[Optional()])
     video_url  = URLField(
         "Video URL",

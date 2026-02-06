@@ -9,12 +9,17 @@
 
 <body>
     <h1>Homepage</h1>
-    {% if session.user_id %}
-    <h2>Welcome, {{ session.username }}</h2>
-    <p>Tokens: {{ tokens }}</p>
     <p><a href="{{url_for('payment.buytokenpage')}}">Buy Token</a></p>
     <p><a href="{{url_for('clipper.auto_clipper')}}">Clipper</a></p>
     <p><a href="{{url_for('autosub.autosub_page')}}">Auto Subtitle</a></p>
+    <p><a href="{{url_for('aspect.aspect_page')}}">Aspect Ratio</a></p>
+    <p><a href="{{url_for('auth.admin')}}">Admin</a></p>
+
+
+    {% if session.user_id %}
+    <h2>Welcome, {{ session.username }}</h2>
+    <p>Tokens: {{ tokens }}</p>
+    
     <a href="/logout">Logout</a>
 
     <h2>Your Video</h2>
@@ -36,7 +41,7 @@
         {% if job.output_file %}
         <h4>📝 Auto Subtitled Video</h4>
 
-        <video width="360" controls>
+        <video width="360" height="240" controls>
             <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
         </video>
 
@@ -50,7 +55,7 @@
         <h4>🎬 Clips</h4>
 
         {% for clip in clips %}
-        <video width="360" controls>
+        <video width="360" height="240" controls>
             <source src="{{ url_for('clipper.clipper_stream',
                             job_id=job.id,
                             filename=clip) }}">
@@ -83,7 +88,7 @@
     <a href="{{url_for('auth.register')}}">Register</a>
 
     {% endif %}
-    <p><a href="{{url_for('auth.admin')}}">Admin</a></p>
+    
 
 
 

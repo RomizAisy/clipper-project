@@ -11,6 +11,7 @@ from clipper.nlp import merge_segments, detect_topic_changes, enforce_min_durati
 from clipper.clipper import cut_topic_clips
 
 from helper.preview_download import get_user_jobs_with_outputs
+from helper.aspect_ratio import convert_aspect
 
 from flask import current_app
 
@@ -55,18 +56,50 @@ def clipper():
     job_dir = tempfile.mkdtemp(prefix="ffmpeg_", dir=BASE_TEMP_DIR)
 
     # Save Uploaded Video
+    aspectRatio = form.aspectRatio.data
+    converted_path = os.path.join(job_dir, "aspect_converted.mp4")
+
     if form.file.data:
         file = form.file.data
         input_filename = secure_filename(file.filename)
-        save_path = os.path.join(job_dir, input_filename)
+        save_path = os.path.join(job_dir, input_filename)        
         file.save(save_path)
-    
+
+        if aspectRatio and aspectRatio != "original":
+            try:
+                convert_aspect(
+                    input_path=save_path,
+                    output_path=converted_path,
+                    ratio=aspectRatio
+                )
+                save_path = converted_path   
+            except Exception as e:
+                return jsonify({"error": f"Aspect ratio conversion failed: {str(e)}"}), 500
+
     elif form.video_url.data:
         save_path = download_from_link(
             form.video_url.data,
             job_dir
         )
-    
+        
+        if aspectRatio and aspectRatio != "original":
+            try:
+                convert_aspect(
+                    input_path=save_path,
+                    output_path=converted_path,
+                    ratio=aspectRatio
+                )
+
+                # optionally delete original to save space
+                # os.remove(save_path)
+
+                save_path = converted_path   # continue pipeline with converted video
+
+            except Exception as e:
+                return jsonify({
+                    "error": f"Aspect ratio conversion failed: {str(e)}"
+                }), 500
+
     else:
         return jsonify({"error": "No video provided"}), 400
 

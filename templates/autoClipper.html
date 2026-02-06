@@ -38,6 +38,11 @@
         </div>
 
         <div class="field">
+            {{ form.aspectRatio.label }}
+            {{ form.aspectRatio() }}
+        </div>
+
+        <div class="field">
             {{ form.submit(class="btn") }}
         </div>
     </form>
@@ -47,68 +52,84 @@
         <p id="statusText">Waiting...</p>
     </div>
 
+<h2>Your Video</h2>
 
-    <h2>Your Video</h2>
+{% for item in jobs %}
+{% set job = item.job %}
+{% set clips = item.clips %}
 
-    {% for item in jobs %}
-    {% set job = item.job %}
-    {% set clips = item.clips %}
+<div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
 
-    <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
+<h3>
+    Job #{{ job.id }}
+    — {{ job.status }}
+    — {{ job.progress }}%
+</h3>
 
-    <h3>
-        Job #{{ job.id }}
-        — {{ job.status }}
-        — {{ job.progress }}%
-    </h3>
+{% if job.status == "processing" %}
+    <p>⏳ {{ job.step }}</p>
 
-    {% if job.status == "processing" %}
-        <p>⏳ {{ job.step }}</p>
+{% elif job.status == "failed" %}
+    <p style="color:red">❌ Failed</p>
 
-    {% elif job.status == "failed" %}
-        <p style="color:red">❌ Failed</p>
+{% elif job.output_file %}
 
-    {% elif job.output_file %}
-        <h4>🎬 Output Video</h4>
+    {% if "aspect" in job.output_file %}
+        <h4>📐 Aspect Ratio Result</h4>
+
+        <video controls width="360">
+            <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}" type="video/mp4">
+        </video>
+
+        <br>
+        <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
+            ⬇ Download Video
+        </a>
+
+    {% else %}
+        <h4>📝 Subtitled Video</h4>
+
         <video controls width="360">
             <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
         </video>
 
         <br>
         <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
-            Download Subtitled Video
+            ⬇ Download Video
         </a>
+    {% endif %}
 
-    {% elif job.status == "finished" and clips %}
-        <h4>🎬 Clips ready</h4>
-         {% for clip in clips %}
+{% elif clips %}
+    <h4>🎬 Clips ready</h4>
+
+    {% for clip in clips %}
         <video width="360" controls>
             <source src="{{ url_for('clipper.clipper_stream',
-                            job_id=job.id,
-                            filename=clip) }}">
+                        job_id=job.id,
+                        filename=clip) }}">
         </video>
 
         <br>
         <a href="{{ url_for('clipper.clipper_download',
-                            job_id=job.id,
-                            filename=clip) }}">
+                        job_id=job.id,
+                        filename=clip) }}">
             Download
         </a>
         <hr>
-        {% endfor %}
+    {% endfor %}
 
-    {% else %}
-        <small>⏳ Waiting…</small>
-    {% endif %}
+{% else %}
+    <small>⏳ Waiting…</small>
+{% endif %}
 
-    <br><br>
-    <button class="delete-job-btn" data-job-id="{{ job.id }}">
-        🗑 Delete
-    </button>
+<br><br>
+<button class="delete-job-btn" data-job-id="{{ job.id }}">
+    🗑 Delete
+</button>
 
 </div>
+{% endfor %}
 
-    {% endfor %}
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {

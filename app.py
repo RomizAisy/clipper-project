@@ -12,6 +12,8 @@ from auth import auth_bp
 from payment import payment_bp
 from clipper import clipper_bp
 from autosubtitle import autosub_bp
+from aspectratio import aspect_bp
+
 
 from helper.preview_download import get_user_jobs_with_outputs
 from helper.cleanup_job import cleanup_old_jobs
@@ -32,6 +34,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(clipper_bp)
 app.register_blueprint(autosub_bp)
+app.register_blueprint(aspect_bp)
 
 db.init_app(app)
 migrate.init_app(app, db)

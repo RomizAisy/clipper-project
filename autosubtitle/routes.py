@@ -10,12 +10,13 @@ from autosubtitle.whisper import transcribe_audio
 from autosubtitle.sub_style import write_ass
 from autosubtitle.burn_sub import burn_subtitles
 
+from helper.preview_download import get_user_jobs_with_outputs
+from helper.aspect_ratio import convert_aspect
+
 from yt_dlp import YoutubeDL
 
 from extensions import db
 from models import VideoJob
-
-from helper.preview_download import get_user_jobs_with_outputs
 
 from flask import current_app
 
@@ -57,18 +58,49 @@ def add_subtitle():
     # Save Uploaded Video
 
     style = form.subtitleStyle.data
+    aspectRatio = form.aspectRatio.data
+    converted_path = os.path.join(job_dir, "aspect_converted.mp4")
 
     if form.file.data:
         file = form.file.data
         input_filename = secure_filename(file.filename)
-        save_path = os.path.join(job_dir, input_filename)
+        save_path = os.path.join(job_dir, input_filename)        
         file.save(save_path)
+
+        if aspectRatio and aspectRatio != "original":
+            try:
+                convert_aspect(
+                    input_path=save_path,
+                    output_path=converted_path,
+                    ratio=aspectRatio
+                )
+                save_path = converted_path   
+            except Exception as e:
+                return jsonify({"error": f"Aspect ratio conversion failed: {str(e)}"}), 500
 
     elif form.video_url.data:
         save_path = download_from_link(
             form.video_url.data,
             job_dir
         )
+        
+        if aspectRatio and aspectRatio != "original":
+            try:
+                convert_aspect(
+                    input_path=save_path,
+                    output_path=converted_path,
+                    ratio=aspectRatio
+                )
+
+                # optionally delete original to save space
+                # os.remove(save_path)
+
+                save_path = converted_path   # continue pipeline with converted video
+
+            except Exception as e:
+                return jsonify({
+                    "error": f"Aspect ratio conversion failed: {str(e)}"
+                }), 500
 
     else:
         return jsonify({"error": "No video provided"}), 400
@@ -241,8 +273,6 @@ def autosub_stream(job_id):
         filename,
         mimetype="video/mp4"
     )
-
-
 
 @autosub_bp.route("/autosub-download/<int:job_id>")
 def autosub_download(job_id):
