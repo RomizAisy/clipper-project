@@ -1,5 +1,5 @@
 from .forms import ClipperFileForm
-import os, tempfile, time
+import os, tempfile, time, traceback
 from werkzeug.utils import secure_filename
 from threading import Thread
 
@@ -104,70 +104,6 @@ def clipper():
     else:
         return jsonify({"error": "No video provided"}), 400
 
-    # Create VideoJob in DB immediately
-    # Get user
-    user = User.query.get(session["user_id"])
-
-    # Calculate required tokens
-    try:
-        required_tokens = calculate_required_tokens(save_path)
-    except Exception as e:
-        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
-
-    # Check token balance
-    if user.tokens < required_tokens:
-        return jsonify({
-            "error": "Not enough tokens",
-            "required": required_tokens,
-            "available": user.tokens
-        }), 403
-
-    # Deduct tokens
-    try:
-        user.tokens -= required_tokens
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return jsonify({"error": "Token deduction failed"}), 500
-
-    # Now create VideoJob
-    job = VideoJob(
-        user_id=user.id,
-        status="processing",
-        progress=0,
-        step="uploaded",
-        job_dir=job_dir,
-        original_filename=os.path.basename(save_path),
-        required_tokens=required_tokens
-    )
-
-    db.session.add(job)
-    db.session.commit()# Get user
-    user = User.query.get(session["user_id"])
-
-    # Calculate required tokens
-    try:
-        required_tokens = calculate_required_tokens(save_path)
-    except Exception as e:
-        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
-
-    # Check token balance
-    if user.tokens < required_tokens:
-        return jsonify({
-            "error": "Not enough tokens",
-            "required": required_tokens,
-            "available": user.tokens
-        }), 403
-
-    # Deduct tokens
-    try:
-        user.tokens -= required_tokens
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return jsonify({"error": "Token deduction failed"}), 500
-
-    # Now create VideoJob
     # Get user
     user = User.query.get(session["user_id"])
 
@@ -218,6 +154,7 @@ def clipper():
         daemon=True
     ).start()
     return jsonify({"job_id": job_id})
+
 
 MAX_SECONDS = 60 * 60   #60 minutes 
 
@@ -313,8 +250,17 @@ def process_video_background(app, job_id, save_path, job_dir):
             db.session.commit()
 
         except Exception as e:
-            job.status = "failed"
+            traceback.print_exc()
+
+            user = User.query.get(job.user_id)
+
+            # Refund tokens
+            if user and job.required_tokens:
+                user.tokens += job.required_tokens
+
+            job.status = "failed, token refunded"
             job.step = str(e)
+
             db.session.commit()
 
 @clipper_bp.route("/clipper-status/<int:job_id>")

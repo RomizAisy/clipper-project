@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, current_app
 
-import os, tempfile, time
+import os, tempfile, time, traceback
 from werkzeug.utils import secure_filename
 from threading import Thread
 
@@ -157,8 +157,17 @@ def process_aspect_background(app, job_id, input_path, ratio):
             db.session.commit()
 
         except Exception as e:
-            job.status = "failed"
+            traceback.print_exc()
+
+            user = User.query.get(job.user_id)
+
+            # Refund tokens
+            if user and job.required_tokens:
+                user.tokens += job.required_tokens
+
+            job.status = "failed, token refunded"
             job.step = str(e)
+
             db.session.commit()
 
     
