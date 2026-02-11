@@ -100,6 +100,7 @@ def aspect_ratio():
         step="uploaded",
         job_dir=job_dir,
         original_filename=os.path.basename(save_path),
+        job_type="aspect",
         required_tokens=required_tokens
     )
 
@@ -109,11 +110,7 @@ def aspect_ratio():
     # RETURN job_id immediately
     job_id = job.id
 
-    # RETURN job_id immediately
-    job_id = job.id
-
     # Start background processing
-    job_id = job.id
     app = current_app._get_current_object()
 
     Thread(

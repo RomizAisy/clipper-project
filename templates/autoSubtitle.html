@@ -58,12 +58,12 @@
         <p id="statusText">Waiting...</p>
     </div>
 
-<h2>Your Video</h2>
+<h2>Your Auto Subtitle Videos</h2>
 
 {% for item in jobs %}
 {% set job = item.job %}
-{% set clips = item.clips %}
 
+{% if job.job_type == "autosub" %}
 <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
 
 <h3>
@@ -78,53 +78,17 @@
 {% elif job.status == "failed" %}
     <p style="color:red">❌ Failed</p>
 
-{% elif job.output_file %}
-
-    {% if "aspect_converted" in job.output_file %}
-        
-        <h4>📐 Aspect Ratio Video</h4>
-
-        <video controls width="360" height="240">
-            <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}" type="video/mp4">
-        </video>
-
-        <br>
-        <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
-            ⬇ Download Converted Video
-        </a>
-
-    {% else %}
+{% elif job.status == "finished" %}
     <h4>📝 Auto Subtitled Video</h4>
 
-        <video controls width="360" height="240">
-            <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
-        </video>
+    <video controls width="360" height="240">
+        <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
+    </video>
 
-        <br>
-        <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
-            ⬇ Download Subtitled Video
-        </a>
-        
-    {% endif %}
-
-{% elif clips %}
-    <h4>🎬 Clips ready</h4>
-
-    {% for clip in clips %}
-        <video controls width="360" height="240">
-            <source src="{{ url_for('clipper.clipper_stream',
-                            job_id=job.id,
-                            filename=clip) }}">
-        </video>
-
-        <br>
-        <a href="{{ url_for('clipper.clipper_download',
-                            job_id=job.id,
-                            filename=clip) }}">
-            Download
-        </a>
-        <hr>
-    {% endfor %}
+    <br>
+    <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
+        ⬇ Download Subtitled Video
+    </a>
 
 {% else %}
     <small>⏳ Waiting…</small>
@@ -136,7 +100,10 @@
 </button>
 
 </div>
+{% endif %}
 {% endfor %}
+
+
 
 
     <script>

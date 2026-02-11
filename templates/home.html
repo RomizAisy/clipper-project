@@ -10,7 +10,7 @@
 <body>
     <h1>Homepage</h1>
     <p><a href="{{url_for('payment.buytokenpage')}}">Buy Token</a></p>
-    <p><a href="{{url_for('clipper.auto_clipper')}}">Clipper</a></p>
+    <p><a href="{{url_for('clipper.auto_clipper')}}">Auto Clipper</a></p>
     <p><a href="{{url_for('autosub.autosub_page')}}">Auto Subtitle</a></p>
     <p><a href="{{url_for('aspect.aspect_page')}}">Aspect Ratio</a></p>
     <p><a href="{{url_for('auth.admin')}}">Admin</a></p>
@@ -22,7 +22,7 @@
     
     <a href="/logout">Logout</a>
 
-    <h2>Your Video</h2>
+    <h2>All Video</h2>
 
     {% for item in jobs %}
     {% set job = item.job %}
@@ -38,7 +38,7 @@
         <p>⏳ {{ job.step }}</p>
         {% endif %}
 
-        {% if job.output_file %}
+        {% if job.job_type == "autosub" and job.status == "finished" %}
         <h4>📝 Auto Subtitled Video</h4>
 
         <video width="360" height="240" controls>
@@ -51,7 +51,20 @@
         </a>
         {% endif %}
 
-        {% if clips %}
+        {% if job.job_type == "aspect" and job.status == "finished" %}
+        <h4>📐 Aspect Ratio Converted</h4>
+
+        <video width="360" height="240" controls>
+            <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}" type="video/mp4">
+        </video>
+
+        <br>
+        <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
+            Download Video
+        </a>
+        {% endif %}
+
+        {% if job.job_type == "clipper" and clips %}
         <h4>🎬 Clips</h4>
 
         {% for clip in clips %}
@@ -70,12 +83,11 @@
         <hr>
         {% endfor %}
         {% endif %}
-
-        {% if job.status != "processing" %}
+        <br><br>
         <button class="delete-job-btn" data-job-id="{{ job.id }}">
             🗑 Delete
         </button>
-        {% endif %}
+
 
     </div>
 

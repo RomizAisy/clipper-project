@@ -57,26 +57,43 @@ def detect_topic_changes(chunks, threshold=0.65):
     clips.append(current)
     return clips
 
-def enforce_min_duration(clips, min_duration=30.0):
+def enforce_min_duration(clips, min_duration=30):
     if not clips:
         return []
 
-    merged = []
-    current = clips[0].copy()
+    new_clips = []
 
-    for i in range(1, len(clips)):
-        duration = current["end"] - current["start"]
+    current_start = clips[0]["start"]
+    current_end = clips[0]["end"]
+    current_text = clips[0].get("text", "")
+
+    for clip in clips[1:]:
+        duration = current_end - current_start
 
         if duration < min_duration:
-            # merge with next
-            current["end"] = clips[i]["end"]
-            current["text"] += " " + clips[i]["text"]
+            # extend clip
+            current_end = clip["end"]
+            current_text += " " + clip.get("text", "")
         else:
-            merged.append(current)
-            current = clips[i].copy()
+            new_clips.append({
+                "start": current_start,
+                "end": current_end,
+                "text": current_text.strip()
+            })
 
-    merged.append(current)
-    return merged
+            current_start = clip["start"]
+            current_end = clip["end"]
+            current_text = clip.get("text", "")
+
+    # append last clip
+    new_clips.append({
+        "start": current_start,
+        "end": current_end,
+        "text": current_text.strip()
+    })
+
+    return new_clips
+
 
 def split_by_max_duration(clips, max_duration=45.0):
     """

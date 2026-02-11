@@ -13,6 +13,7 @@ class VideoJob(db.Model):
     original_filename=db.Column(db.String(255))
     output_file = db.Column(db.String)
     required_tokens = db.Column(db.Integer, nullable=False, default=0)
+    job_type = db.Column(db.String(20))  
     created_at = db.Column(
         db.DateTime,
         default=db.func.now()

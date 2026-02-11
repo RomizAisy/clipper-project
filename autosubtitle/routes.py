@@ -139,6 +139,7 @@ def add_subtitle():
         step="uploaded",
         job_dir=job_dir,
         original_filename=os.path.basename(save_path),
+        job_type="autosub",
         required_tokens=required_tokens
     )
 

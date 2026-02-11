@@ -137,6 +137,7 @@ def clipper():
         step="uploaded",
         job_dir=job_dir,
         original_filename=os.path.basename(save_path),
+        job_type="clipper",
         required_tokens=required_tokens
     )
 
@@ -234,6 +235,11 @@ def process_video_background(app, job_id, save_path, job_dir):
             job.step = "analyzing topics"
             db.session.commit()
             topic_clips = detect_topic_changes(merged, threshold=0.85)
+
+            topic_clips = enforce_min_duration(
+                topic_clips,
+                min_duration=30  # or 60
+            )
 
             job.progress = 85
             job.step = "cutting clips"
