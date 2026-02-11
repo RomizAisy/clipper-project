@@ -12,13 +12,14 @@ from clipper.clipper import cut_topic_clips
 
 from helper.preview_download import get_user_jobs_with_outputs
 from helper.aspect_ratio import convert_aspect
+from helper.calculate_tokens import calculate_required_tokens
 
 from flask import current_app
 
 from yt_dlp import YoutubeDL
 
 from extensions import db
-from models import VideoJob
+from models import VideoJob, User
 
 
 clipper_bp = Blueprint("clipper", __name__ )
@@ -104,13 +105,105 @@ def clipper():
         return jsonify({"error": "No video provided"}), 400
 
     # Create VideoJob in DB immediately
+    # Get user
+    user = User.query.get(session["user_id"])
+
+    # Calculate required tokens
+    try:
+        required_tokens = calculate_required_tokens(save_path)
+    except Exception as e:
+        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
+
+    # Check token balance
+    if user.tokens < required_tokens:
+        return jsonify({
+            "error": "Not enough tokens",
+            "required": required_tokens,
+            "available": user.tokens
+        }), 403
+
+    # Deduct tokens
+    try:
+        user.tokens -= required_tokens
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"error": "Token deduction failed"}), 500
+
+    # Now create VideoJob
     job = VideoJob(
-        user_id=session["user_id"],
+        user_id=user.id,
         status="processing",
         progress=0,
         step="uploaded",
-        job_dir=job_dir
+        job_dir=job_dir,
+        original_filename=os.path.basename(save_path),
+        required_tokens=required_tokens
     )
+
+    db.session.add(job)
+    db.session.commit()# Get user
+    user = User.query.get(session["user_id"])
+
+    # Calculate required tokens
+    try:
+        required_tokens = calculate_required_tokens(save_path)
+    except Exception as e:
+        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
+
+    # Check token balance
+    if user.tokens < required_tokens:
+        return jsonify({
+            "error": "Not enough tokens",
+            "required": required_tokens,
+            "available": user.tokens
+        }), 403
+
+    # Deduct tokens
+    try:
+        user.tokens -= required_tokens
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"error": "Token deduction failed"}), 500
+
+    # Now create VideoJob
+    # Get user
+    user = User.query.get(session["user_id"])
+
+    # Calculate required tokens
+    try:
+        required_tokens = calculate_required_tokens(save_path)
+    except Exception as e:
+        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
+
+    # Check token balance
+    if user.tokens < required_tokens:
+        return jsonify({
+            "error": "Not enough tokens",
+            "required": required_tokens,
+            "available": user.tokens
+        }), 403
+
+    # Deduct tokens
+    try:
+        user.tokens -= required_tokens
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"error": "Token deduction failed"}), 500
+
+    # Now create VideoJob
+    job = VideoJob(
+        user_id=user.id,
+        status="processing",
+        progress=0,
+        step="uploaded",
+        job_dir=job_dir,
+        original_filename=os.path.basename(save_path),
+        required_tokens=required_tokens
+    )
+
     db.session.add(job)
     db.session.commit()
 

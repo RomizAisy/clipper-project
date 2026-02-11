@@ -4,17 +4,18 @@ import os, tempfile, time
 from werkzeug.utils import secure_filename
 from threading import Thread
 
-from flask import Blueprint, render_template, session, jsonify, redirect, url_for, abort, send_from_directory
+from flask import Blueprint, render_template, session, jsonify, redirect, url_for, abort, send_from_directory, send_file
 
 from .forms import AspectFileForm
 
 from helper.preview_download import get_user_jobs_with_outputs
 from helper.aspect_ratio import convert_aspect
+from helper.calculate_tokens import calculate_required_tokens
 
 from yt_dlp import YoutubeDL
 
 from extensions import db
-from models import VideoJob
+from models import VideoJob, User
 
 
 
@@ -53,7 +54,6 @@ def aspect_ratio():
 
     # Save Uploaded Video
     aspectRatio = form.aspectRatio.data
-    converted_path = os.path.join(job_dir, "aspect_converted.mp4")
 
     if form.file.data:
         file = form.file.data
@@ -67,16 +67,47 @@ def aspect_ratio():
         return jsonify({"error": "No video provided"}), 400
     
 
-    # Create VideoJob in DB immediately
+    # Get user
+    user = User.query.get(session["user_id"])
+
+    # Calculate required tokens
+    try:
+        required_tokens = calculate_required_tokens(save_path)
+    except Exception as e:
+        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
+
+    # Check token balance
+    if user.tokens < required_tokens:
+        return jsonify({
+            "error": "Not enough tokens",
+            "required": required_tokens,
+            "available": user.tokens
+        }), 403
+
+    # Deduct tokens
+    try:
+        user.tokens -= required_tokens
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"error": "Token deduction failed"}), 500
+
+    # Now create VideoJob
     job = VideoJob(
-        user_id=session["user_id"],
+        user_id=user.id,
         status="processing",
         progress=0,
         step="uploaded",
-        job_dir=job_dir
+        job_dir=job_dir,
+        original_filename=os.path.basename(save_path),
+        required_tokens=required_tokens
     )
+
     db.session.add(job)
     db.session.commit()
+
+    # RETURN job_id immediately
+    job_id = job.id
 
     # RETURN job_id immediately
     job_id = job.id
@@ -192,7 +223,7 @@ def aspect_stream(job_id):
     if not job.output_file or not os.path.exists(job.output_file):
         abort(404, "Output not ready")
 
-    return send_from_directory(
+    return send_file(
         job.output_file,
         mimetype="video/mp4"
     )
@@ -210,9 +241,9 @@ def aspect_download(job_id):
 
     output_dir = os.path.join(job.job_dir, "output")
 
-    return send_from_directory(
-        output_dir,
-        "subtitled.mp4",
+    return send_file(
+        job.output_file,
         as_attachment=True,
+        download_name="aspect_converted.mp4",
         mimetype="video/mp4"
     )

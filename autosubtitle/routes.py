@@ -12,11 +12,12 @@ from autosubtitle.burn_sub import burn_subtitles
 
 from helper.preview_download import get_user_jobs_with_outputs
 from helper.aspect_ratio import convert_aspect
+from helper.calculate_tokens import calculate_required_tokens
 
 from yt_dlp import YoutubeDL
 
 from extensions import db
-from models import VideoJob
+from models import VideoJob, User
 
 from flask import current_app
 
@@ -105,15 +106,42 @@ def add_subtitle():
     else:
         return jsonify({"error": "No video provided"}), 400
 
-     # Create VideoJob in DB immediately
+    # Get user
+    user = User.query.get(session["user_id"])
+
+    # Calculate required tokens
+    try:
+        required_tokens = calculate_required_tokens(save_path)
+    except Exception as e:
+        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
+
+    # Check token balance
+    if user.tokens < required_tokens:
+        return jsonify({
+            "error": "Not enough tokens",
+            "required": required_tokens,
+            "available": user.tokens
+        }), 403
+
+    # Deduct tokens
+    try:
+        user.tokens -= required_tokens
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"error": "Token deduction failed"}), 500
+
+    # Now create VideoJob
     job = VideoJob(
-        user_id=session["user_id"],
+        user_id=user.id,
         status="processing",
         progress=0,
         step="uploaded",
         job_dir=job_dir,
-        original_filename=os.path.basename(save_path)
+        original_filename=os.path.basename(save_path),
+        required_tokens=required_tokens
     )
+
     db.session.add(job)
     db.session.commit()
 
@@ -199,7 +227,7 @@ def process_autosubs_background(app, job_id, video_path, style):
                 job.job_dir,
                 f"subtitled_{os.path.basename(video_path)}"
             )
-            print("Extracting audio to:", audio_path)
+
             audio_path = extract_audio(video_path, job.job_dir)
 
             job.step = "transcribing"
@@ -232,9 +260,17 @@ def process_autosubs_background(app, job_id, video_path, style):
             db.session.commit()
 
         except Exception as e:
-            job.status = "failed"
             traceback.print_exc()
+
+            user = User.query.get(job.user_id)
+
+            # Refund tokens
+            if user and job.required_tokens:
+                user.tokens += job.required_tokens
+
+            job.status = "failed, token refunded"
             job.step = str(e)
+
             db.session.commit()
 
 @autosub_bp.route("/autosub-status/<int:job_id>")

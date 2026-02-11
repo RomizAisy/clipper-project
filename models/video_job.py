@@ -11,10 +11,11 @@ class VideoJob(db.Model):
     step = db.Column(db.String(50))     # upload, transcribe, nlp, cutting
     job_dir = db.Column(db.String(255))
     original_filename=db.Column(db.String(255))
-    output_file = db.Column(db.String) 
+    output_file = db.Column(db.String)
+    required_tokens = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(
-        db.DateTime(timezone=True),
-        server_default=func.now()
+        db.DateTime,
+        default=db.func.now()
     )
 
     

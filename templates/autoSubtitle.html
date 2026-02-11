@@ -81,18 +81,7 @@
 {% elif job.output_file %}
 
     {% if "aspect_converted" in job.output_file %}
-        <h4>📝 Auto Subtitled Video</h4>
-
-        <video controls width="360" height="240">
-            <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
-        </video>
-
-        <br>
-        <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
-            ⬇ Download Subtitled Video
-        </a>
-
-    {% else %}
+        
         <h4>📐 Aspect Ratio Video</h4>
 
         <video controls width="360" height="240">
@@ -103,6 +92,19 @@
         <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
             ⬇ Download Converted Video
         </a>
+
+    {% else %}
+    <h4>📝 Auto Subtitled Video</h4>
+
+        <video controls width="360" height="240">
+            <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
+        </video>
+
+        <br>
+        <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
+            ⬇ Download Subtitled Video
+        </a>
+        
     {% endif %}
 
 {% elif clips %}
