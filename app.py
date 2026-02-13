@@ -13,6 +13,8 @@ from payment import payment_bp
 from clipper import clipper_bp
 from autosubtitle import autosub_bp
 from aspectratio import aspect_bp
+from music import music_bp
+
 
 
 from helper.preview_download import get_user_jobs_with_outputs
@@ -35,6 +37,7 @@ app.register_blueprint(payment_bp)
 app.register_blueprint(clipper_bp)
 app.register_blueprint(autosub_bp)
 app.register_blueprint(aspect_bp)
+app.register_blueprint(music_bp)
 
 db.init_app(app)
 migrate.init_app(app, db)

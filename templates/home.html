@@ -1,138 +1,173 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='src/output.css') }}">
-</head>
+{% block title %}Home{% endblock %}
 
-<body>
-    <h1 class="text-4xl text-red-500 font-bold">Homepage</h1>
-    <p><a href="{{url_for('payment.buytokenpage')}}">Buy Token</a></p>
-    <p><a href="{{url_for('clipper.auto_clipper')}}">Auto Clipper</a></p>
-    <p><a href="{{url_for('autosub.autosub_page')}}">Auto Subtitle</a></p>
-    <p><a href="{{url_for('aspect.aspect_page')}}">Aspect Ratio</a></p>
-    <p><a href="{{url_for('auth.admin')}}">Admin</a></p>
+{% block content %}
 
+<div class="space-y-6">
 
-    {% if session.user_id %}
-    <h2>Welcome, {{ session.username }}</h2>
-    <p>Tokens: {{ tokens }}</p>
-    
-    <a href="/logout">Logout</a>
+    <h1 class="text-4xl font-bold text-amber-400">Dashboard</h1>
 
-    <h1 class="text-4xl font-bold">Your Video</h1>
-
-    {% for item in jobs %}
-    {% set job = item.job %}
-    {% set clips = item.clips %}
-
-    <div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
-
-        <h3>
-            Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
-        </h3>
-
-        {% if job.status == "processing" %}
-        <p>⏳ {{ job.step }}</p>
-        {% endif %}
-
-        {% if job.job_type == "autosub" and job.status == "finished" %}
-        <h4>📝 Auto Subtitled Video</h4>
-
-        <video width="360" height="240" controls>
-            <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
-        </video>
-
-        <br>
-        <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
-            Download Subtitled Video
+    <!-- Navigation Links -->
+    <div class="flex flex-wrap gap-4">
+        <a href="{{ url_for('payment.buytokenpage') }}"
+           class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg">
+            Buy Token
         </a>
-        {% endif %}
 
-        {% if job.job_type == "aspect" and job.status == "finished" %}
-        <h4>📐 Aspect Ratio Converted</h4>
-
-        <video width="360" height="240" controls>
-            <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}" type="video/mp4">
-        </video>
-
-        <br>
-        <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
-            Download Video
+        <a href="{{ url_for('clipper.auto_clipper') }}"
+           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+            Auto Clipper
         </a>
-        {% endif %}
 
-        {% if job.job_type == "clipper" and clips %}
-        <h4>🎬 Clips</h4>
-
-        {% for clip in clips %}
-        <video width="360" height="240" controls>
-            <source src="{{ url_for('clipper.clipper_stream',
-                            job_id=job.id,
-                            filename=clip) }}">
-        </video>
-
-        <br>
-        <a href="{{ url_for('clipper.clipper_download',
-                            job_id=job.id,
-                            filename=clip) }}">
-            Download
+        <a href="{{ url_for('autosub.autosub_page') }}"
+           class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+            Auto Subtitle
         </a>
-        <hr>
-        {% endfor %}
-        {% endif %}
-        <br><br>
-        <button class="delete-job-btn" data-job-id="{{ job.id }}">
-            🗑 Delete
-        </button>
 
+        <a href="{{ url_for('aspect.aspect_page') }}"
+           class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+            Aspect Ratio
+        </a>
 
+        <a href="{{ url_for('auth.admin') }}"
+           class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg">
+            Admin
+        </a>
     </div>
 
-    {% endfor %}
+    {% if session.user_id %}
+
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h2 class="text-xl font-semibold">Welcome, {{ session.username }}</h2>
+            <p class="text-gray-600">Tokens: {{ tokens }}</p>
+        </div>
+
+        <h2 class="text-2xl font-bold mt-6 text-amber-900">Your Videos</h2>
+
+        <div class="space-y-6">
+
+        {% for item in jobs %}
+        {% set job = item.job %}
+        {% set clips = item.clips %}
+
+        <div class="bg-white p-6 rounded-xl shadow">
+
+            <h3 class="font-semibold mb-2">
+                Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
+            </h3>
+
+            {% if job.status == "processing" %}
+                <p class="text-yellow-600">⏳ {{ job.step }}</p>
+            {% endif %}
+
+            <!-- Auto Subtitle -->
+            {% if job.job_type == "autosub" and job.status == "finished" %}
+                <h4 class="font-medium mt-4">📝 Auto Subtitled Video</h4>
+
+                <video class="mt-2 rounded-lg" width="360" controls>
+                    <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
+                </video>
+
+                <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}"
+                   class="block mt-2 text-blue-600 hover:underline">
+                    Download Subtitled Video
+                </a>
+            {% endif %}
+
+            <!-- Aspect -->
+            {% if job.job_type == "aspect" and job.status == "finished" %}
+                <h4 class="font-medium mt-4">📐 Aspect Ratio Converted</h4>
+
+                <video class="mt-2 rounded-lg" width="360" controls>
+                    <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}" type="video/mp4">
+                </video>
+
+                <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}"
+                   class="block mt-2 text-blue-600 hover:underline">
+                    Download Video
+                </a>
+            {% endif %}
+
+            <!-- Clipper -->
+            {% if job.job_type == "clipper" and clips %}
+                <h4 class="font-medium mt-4">🎬 Clips</h4>
+
+                {% for clip in clips %}
+                    <video class="mt-2 rounded-lg" width="360" controls>
+                        <source src="{{ url_for('clipper.clipper_stream',
+                                        job_id=job.id,
+                                        filename=clip) }}">
+                    </video>
+
+                    <a href="{{ url_for('clipper.clipper_download',
+                                        job_id=job.id,
+                                        filename=clip) }}"
+                       class="block mt-1 text-blue-600 hover:underline">
+                        Download
+                    </a>
+                {% endfor %}
+            {% endif %}
+
+            <button
+                class="delete-job-btn mt-4 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
+                data-job-id="{{ job.id }}">
+                🗑 Delete
+            </button>
+
+        </div>
+
+        {% endfor %}
+        </div>
+
     {% else %}
 
-    <h2>Welcome, Guest</h2>
-    <p>Tokens: {{ tokens }}</p>
-    <a href="{{url_for('auth.login')}}">Login</a>
-    <a href="{{url_for('auth.register')}}">Register</a>
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h2 class="text-xl font-semibold">Welcome, Guest</h2>
+            <p class="text-gray-600">Tokens: {{ tokens }}</p>
+
+            <div class="mt-4 space-x-4">
+                <a href="{{ url_for('auth.login') }}"
+                   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    Login
+                </a>
+
+                <a href="{{ url_for('auth.register') }}"
+                   class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                    Register
+                </a>
+            </div>
+        </div>
 
     {% endif %}
-    
+
+</div>
+
+{% endblock %}
 
 
+{% block scripts %}
+<script>
+document.addEventListener("click", async (e) => {
+    if (!e.target.classList.contains("delete-job-btn")) return;
 
-    <script>
-        document.addEventListener("click", async (e) => {
-            if (!e.target.classList.contains("delete-job-btn")) return;
+    const jobId = e.target.dataset.jobId;
 
-            const jobId = e.target.dataset.jobId;
+    if (!confirm("Are you sure you want to delete this job?")) return;
 
-            if (!confirm("Are you sure you want to delete this job?")) return;
+    try {
+        const res = await fetch(`/clipper-delete/${jobId}`, { method: "POST" });
 
-            try {
-                const res = await fetch(`/clipper-delete/${jobId}`, {
-                    method: "POST"
-                });
+        if (!res.ok) {
+            alert("Failed to delete job");
+            return;
+        }
 
-                if (!res.ok) {
-                    alert("Failed to delete job");
-                    return;
-                }
-
-                // ✅ Remove job from UI immediately
-                e.target.closest(".job-card").remove();
-
-            } catch (err) {
-                console.error(err);
-                alert("Error deleting job");
-            }
-        });
-    </script>
-
-</body>
-
-</html>
+        e.target.closest(".bg-white").remove();
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting job");
+    }
+});
+</script>
+{% endblock %}
