@@ -1,261 +1,302 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto Subtitile</title>
-    <style>
-        #bar {
-            width: 0%;
-            height: 20px;
-            background-color: green;
-        }
+{% block title %}Auto Subtitle{% endblock %}
 
-        #progress {
-            width: 100%;
-            background-color: #ddd;
-        }
-    </style>
-</head>
+{% block content %}
+<section class="max-w-5xl mx-auto px-6 py-24">
 
-<body>
-    <h1>Auto Subtitle</h1>
-    <a href="{{url_for('home')}}">Home</a>
-    <form id="uploadForm" method="POST" action="/add-subtitle" enctype="multipart/form-data">
+    <!-- HERO -->
+    <div class="text-center space-y-6 mb-10">
 
-        {{ form.hidden_tag() }}
+        <h3 class="text-sm font-semibold tracking-tight">
+            AUTO SUBTITLE TOOL
+        </h3>
 
-        <div class="field">
-            {{ form.file.label }}
-            {{ form.file() }}
-        </div>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
+            Add Subtitles in One Click
+        </h1>
 
-        <div class="divider">OR</div>
+        <p class="text-gray-500 max-w-2xl mx-auto">
+            Upload a video or paste a link. We automatically generate animated subtitles for your videos.
+        </p>
 
-        <div class="field">
-            {{ form.video_url.label }}
-            {{ form.video_url(placeholder="Paste YouTube / TikTok link") }}
-        </div>
-
-        <div class="field">
-            {{ form.subtitleStyle.label }}
-            {{ form.subtitleStyle() }}
-        </div>
-        <div class="field">
-            {{ form.aspectRatio.label }}
-            {{ form.aspectRatio() }}
-        </div>
-
-        <div class="field">
-            {{ form.submit(class="btn") }}
-        </div>
-
-    </form>
-
-    <div id="progress">
-        <div id="bar" style="width: 0%; height: 20px; background-color: green;"></div>
-        <p id="statusText">Waiting...</p>
     </div>
 
-{% if session.get("user_id") %}
-    <h2>Your Auto Subtitle Videos</h2>
+    <!-- FORM CARD -->
+    <div class="shadow-xl rounded-2xl p-6 md:p-8 max-w-3xl mx-auto">
 
-    {% for job in jobs %}
-        ...
-    {% endfor %}
-{% else %}
-    <p class="text-gray-500">
-        Login to see your processed videos.
-    </p>
-{% endif %}
+        <form id="uploadForm" method="POST" action="/add-subtitle" enctype="multipart/form-data"
+            class="space-y-6 max-w-2xl mx-auto">
+
+            {{ form.hidden_tag() }}
+
+            <!-- URL + FILE -->
+            <div class="flex justify-center">
+                <div class="flex items-center gap-4 w-full">
+
+                    <div class="flex-[3]">
+                        {{ form.video_url(
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black",
+                        placeholder="Paste YouTube / TikTok link"
+                        ) }}
+                    </div>
+
+                    <div class="text-gray-400 text-sm font-medium">
+                        OR
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        {{ form.file(class="hidden", id="fileInput") }}
+
+                        <label for="fileInput" class="bg-black text-white px-4 py-2 rounded-lg cursor-pointer">
+                            Upload File
+                        </label>
+
+                        <span id="fileName" class="text-gray-400 text-sm"></span>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="w-full bg-gray-200 rounded mt-2 hidden">
+                <div id="progressBar" class="bg-black h-2 rounded w-0"></div>
+            </div>
+
+            <!-- STYLE -->
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">
+                    {{ form.subtitleStyle.label.text }}
+                </label>
+
+                {{ form.subtitleStyle(
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black"
+                ) }}
+            </div>
+
+            <!-- RATIO -->
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">
+                    {{ form.aspectRatio.label.text }}
+                </label>
+
+                {{ form.aspectRatio(
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black"
+                ) }}
+            </div>
+
+            <!-- SUBMIT -->
+            {{ form.submit(
+            class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition font-medium"
+            ) }}
+
+        </form>
+    </div>
+
+</section>
 
 
-{% for item in jobs %}
-{% set job = item.job %}
+<!-- JOBS -->
+<section class="mx-auto px-6 pb-24">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-{% if job.job_type == "autosub" %}
-<div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
+        {% for item in jobs %}
+        {% set job = item.job %}
 
-<h3>
-    Job #{{ job.id }}
-    — {{ job.status }}
-    — {{ job.progress }}%
-</h3>
+        {% if job.job_type == "autosub" %}
+        <div class="job-card border p-4 rounded-lg bg-white shadow-sm">
 
-{% if job.status == "processing" %}
-    <p>⏳ {{ job.step }}</p>
+            <h3 class="font-semibold mb-2">
+                Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
+            </h3>
 
-{% elif job.status == "failed" %}
-    <p style="color:red">❌ Failed</p>
+            {% if job.status == "processing" %}
+            <p>⏳ {{ job.step }}</p>
 
-{% elif job.status == "finished" %}
-    <h4>📝 Auto Subtitled Video</h4>
+            {% elif job.status == "failed" %}
+            <p class="text-red-500">❌ Failed</p>
 
-    <video controls width="360" height="240">
-        <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
-    </video>
+            {% elif job.status == "finished" %}
+            <h4 class="mb-2">📝 Auto Subtitled Video</h4>
 
-    <br>
-    <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
-        ⬇ Download Subtitled Video
-    </a>
+            <div class="aspect-video bg-black rounded overflow-hidden">
+                <video controls class="w-full h-full object-contain">
+                    <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}">
+                </video>
+            </div>
 
-{% else %}
-    <small>⏳ Waiting…</small>
-{% endif %}
+            <a class="block mt-3 text-blue-600 hover:underline text-sm" href="{{ url_for('autosub.autosub_download', job_id=job.id) }}">
+                Download
+            </a>
 
-<br><br>
-<button class="delete-job-btn" data-job-id="{{ job.id }}">
-    🗑 Delete
-</button>
+            {% else %}
+            <small>⏳ Waiting…</small>
+            {% endif %}
 
-</div>
-{% endif %}
-{% endfor %}
+            <button class="delete-job-btn mt-4 text-sm text-red-500" data-job-id="{{ job.id }}">
+                🗑 Delete
+            </button>
 
+        </div>
+        {% endif %}
+        {% endfor %}
 
+    </div>
 
-    {% if not session.get("user_id") %}
-    <script>
-    document.querySelector("form").addEventListener("click", (e) => {
-        if (e.target.type === "submit") {
-            e.preventDefault();
-            window.location.href = "/register";
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const uploadForm = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("fileInput");
+    const fileNameSpan = document.getElementById("fileName");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
+
+    // -------------------------------
+    // Show chosen file name immediately
+    // -------------------------------
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+            fileNameSpan.textContent = fileInput.files[0].name;
+        } else {
+            fileNameSpan.textContent = "No file chosen";
         }
     });
-    </script>
-    {% endif %}
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // On page load: resume polling if a job was in progress
-            const lastJobId = localStorage.getItem("lastJobId");
-            if (lastJobId) startPolling(lastJobId);
 
-            // Handle new upload
-            document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-                e.preventDefault();
+    // -------------------------------
+    // Single form submit handler
+    // -------------------------------
+    uploadForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-                const formData = new FormData(e.target);
-
-                try {
-                    const res = await fetch("/add-subtitle", {
-                        method: "POST",
-                        body: formData
-                    });
-
-                    if (!res.ok) {
-                        const error = await res.json();
-                        alert(error.error || "Upload failed");
-                        return;
-                    }
-
-                    const data = await res.json();
-
-                    // Save job_id so we can resume polling after refresh
-                    localStorage.setItem("lastJobId", data.job_id);
-
-                    // Start polling progress
-                    startPolling(data.job_id);
-
-                } catch (err) {
-                    console.error("Upload error:", err);
-                    alert("Something went wrong during upload.");
-                }
-            });
-        });
-
-        function startPolling(jobId) {
-            const interval = setInterval(async () => {
-                try {
-                    const res = await fetch(`/autosubs-status/${jobId}`);
-
-                    // 🔴 STOP if job is gone or inaccessible
-                    if (res.status === 404) {
-                        clearInterval(interval);
-                        localStorage.removeItem("lastJobId");
-                        document.getElementById("statusText").innerText =
-                            "⚠️ Job not found or expired";
-                        return;
-                    }
-
-                    if (res.status === 401 || res.status === 403) {
-                        clearInterval(interval);
-                        localStorage.removeItem("lastJobId");
-                        document.getElementById("statusText").innerText =
-                            "⛔ Unauthorized access";
-                        return;
-                    }
-
-                    if (!res.ok) {
-                        clearInterval(interval);
-                        document.getElementById("statusText").innerText =
-                            "❌ Unexpected error";
-                        return;
-                    }
-
-                    const data = await res.json();
-
-                    document.getElementById("bar").style.width = data.progress + "%";
-                    document.getElementById("statusText").innerText =
-                        `${data.step} (${data.progress}%)`;
-
-                    // 🔴 STOP when job ends
-                    if (
-                        data.status === "finished" ||
-                        data.status === "failed" ||
-                        data.status === "cancelled"
-                    ) {
-                        clearInterval(interval);
-                        localStorage.removeItem("lastJobId");
-
-                        document.getElementById("statusText").innerText =
-                            data.status === "finished"
-                                ? "✅ Finished!"
-                                : data.status === "cancelled"
-                                    ? "⏹ Cancelled"
-                                    : "❌ Failed";
-                        if (data.status === "finished") {
-                            setTimeout(() => location.reload(), 800);
-                        }
-                    }
-
-
-                } catch (err) {
-                    clearInterval(interval);
-                    console.error("Polling error:", err);
-                }
-            }, 1500);
+        // Validate file or URL
+        const urlValue = uploadForm.querySelector("input[name='video_url']").value;
+        if (fileInput.files.length === 0 && !urlValue) {
+            alert("Please select a file or provide a URL.");
+            return;
         }
-        document.addEventListener("click", async (e) => {
-            if (!e.target.classList.contains("delete-job-btn")) return;
 
-            const jobId = e.target.dataset.jobId;
+        const formData = new FormData(uploadForm);
 
-            if (!confirm("Are you sure you want to delete this job?")) return;
+        // Show progress
+        progressContainer.classList.remove("hidden");
+        progressBar.style.width = "0%";
+        fileNameSpan.textContent = "Uploading...";
 
+        try {
+            const res = await fetch("/add-subtitle", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                fileNameSpan.textContent = error.error || "Upload failed";
+                progressContainer.classList.add("hidden");
+                return;
+            }
+
+            const data = await res.json();
+            const jobId = data.job_id;
+
+            // Save last job ID to resume polling after refresh
+            localStorage.setItem("lastJobId", jobId);
+
+            // Start polling
+            startPolling(jobId);
+
+        } catch (err) {
+            console.error("Upload error:", err);
+            fileNameSpan.textContent = "Upload failed";
+            progressContainer.classList.add("hidden");
+        }
+    });
+
+    // -------------------------------
+    // Polling function
+    // -------------------------------
+    function startPolling(jobId) {
+        const interval = setInterval(async () => {
             try {
-                const res = await fetch(`/clipper-delete/${jobId}`, {
-                    method: "POST"
-                });
-
+                const res = await fetch(`/autosubs-status/${jobId}`);
                 if (!res.ok) {
-                    alert("Failed to delete job");
+                    clearInterval(interval);
+                    fileNameSpan.textContent = "Error getting status";
                     return;
                 }
 
-                // ✅ Remove job from UI immediately
-                e.target.closest(".job-card").remove();
+                const data = await res.json();
+                progressBar.style.width = data.progress + "%";
+                fileNameSpan.textContent = `${data.step} (${data.progress}%)`;
 
+                if (["finished", "failed", "cancelled"].includes(data.status)) {
+                    clearInterval(interval);
+                    fileNameSpan.textContent =
+                        data.status === "finished" ? "✅ Finished!" :
+                        data.status === "cancelled" ? "⏹ Cancelled" :
+                        "❌ Failed";
+
+                    // Remove lastJobId after job completes
+                    localStorage.removeItem("lastJobId");
+
+                    if (data.status === "finished") {
+                        setTimeout(() => location.reload(), 800);
+                    }
+                }
             } catch (err) {
-                console.error(err);
-                alert("Error deleting job");
+                clearInterval(interval);
+                console.error("Polling error:", err);
+                fileNameSpan.textContent = "Polling error";
             }
-        });
+        }, 1500);
+    }
 
-    </script>
+    // -------------------------------
+    // Resume polling if page refreshed
+    // -------------------------------
+    const lastJobId = localStorage.getItem("lastJobId");
+    if (lastJobId) startPolling(lastJobId);
+
+    // -------------------------------
+    // Job deletion handler
+    // -------------------------------
+    document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".delete-job-btn");
+        if (!btn) return;
+
+        const jobId = btn.dataset.jobId;
+        if (!confirm("Are you sure you want to delete this job?")) return;
+
+        try {
+            const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+            const res = await fetch(`/clipper-delete/${jobId}`, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({ job_id: jobId })
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || `Failed to delete job (status ${res.status})`);
+                return;
+            }
+
+            btn.closest(".job-card").remove();
+
+        } catch (err) {
+            console.error(err);
+            alert("Error deleting job");
+        }
+    });
+});
+</script>
 
 
-</body>
-
-</html>
+{% endblock %}

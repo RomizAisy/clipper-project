@@ -12,6 +12,10 @@ PACKAGES = {
     "pro": {"tokens": 200, "price": 70000},
 }
 
+@payment_bp.route("/price")
+def price():
+    return render_template("price.html")
+
 @payment_bp.route("/buytoken")
 def buytokenpage():
     if "user_id" not in session:

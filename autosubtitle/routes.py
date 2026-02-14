@@ -33,11 +33,16 @@ def autosub_page():
 
     if user_id:
         jobs = get_user_jobs_with_outputs(user_id)
+        return render_template(
+        "autoSubtitle.html",
+        form=form,
+        jobs=jobs
+    )
     else:
         jobs = []  # guest has no jobs
 
     return render_template(
-        "autoSubtitle.html",
+        "guestSubtitle.html",
         form=form,
         jobs=jobs
     )
@@ -46,10 +51,7 @@ def autosub_page():
 def add_subtitle():
     form = AutosubFileForm()
     if "user_id" not in session:
-        return jsonify({
-            "error": "Unauthorized",
-            "redirect": url_for("/register")
-        }), 401
+        return redirect(url_for("auth.register"))
 
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400
@@ -92,22 +94,15 @@ def add_subtitle():
         )
         
         if aspectRatio and aspectRatio != "original":
-            try:
-                convert_aspect(
-                    input_path=save_path,
-                    output_path=converted_path,
-                    ratio=aspectRatio
-                )
-
-                # optionally delete original to save space
-                # os.remove(save_path)
-
-                save_path = converted_path   # continue pipeline with converted video
-
-            except Exception as e:
-                return jsonify({
-                    "error": f"Aspect ratio conversion failed: {str(e)}"
-                }), 500
+            convert_aspect(
+                input_path=save_path,
+                output_path=converted_path,
+                ratio=aspectRatio
+            )
+            # remove original
+            if os.path.exists(save_path):
+                os.remove(save_path)
+            save_path = converted_path
 
     else:
         return jsonify({"error": "No video provided"}), 400

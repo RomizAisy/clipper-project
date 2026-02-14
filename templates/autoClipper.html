@@ -1,143 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto Subtitile</title>
-    <style>
-        #bar {
-            width: 0%;
-            height: 20px;
-            background-color: green;
-        }
+{% block title %}Auto Clipper{% endblock %}
 
-        #progress {
-            width: 100%;
-            background-color: #ddd;
-        }
-    </style>
-</head>
+{% block content %}
 
-<body>
-    <h1>Auto Clipper</h1>
-    <a href="{{url_for('home')}}">Home</a>
-    <form id="uploadForm" action="/clipper-video" method="POST" enctype="multipart/form-data">
-        {{form.hidden_tag()}}
+<section class="max-w-4xl mx-auto px-4 py-10 space-y-10">
 
-        <div class="field">
-            {{ form.file.label }}
-            {{ form.file() }}
-        </div>
-
-        <div class="divider">OR</div>
-
-        <div class="field">
-            {{ form.video_url.label }}
-            {{ form.video_url(placeholder="Paste YouTube / TikTok link") }}
-        </div>
-
-        <div class="field">
-            {{ form.aspectRatio.label }}
-            {{ form.aspectRatio() }}
-        </div>
-
-        <div class="field">
-            {{ form.submit(class="btn") }}
-        </div>
-    </form>
-
-    <div id="progress">
-        <div id="bar" style="width: 0%; height: 20px; background-color: green;"></div>
-        <p id="statusText">Waiting...</p>
+    <!-- HEADER -->
+    <div class="text-center space-y-2">
+        <h1 class="text-3xl font-bold">Auto Clipper</h1>
     </div>
 
-<h2>Your Clipper Videos</h2>
+    <!-- ================= FORM ================= -->
+    <form id="uploadForm"
+          action="/clipper-video"
+          method="POST"
+          enctype="multipart/form-data"
+          class="space-y-6 bg-white p-6 rounded-xl shadow">
 
-{% for item in jobs %}
-{% set job = item.job %}
-{% set clips = item.clips %}
+        {{ form.hidden_tag() }}
 
-{% if job.job_type == "clipper" %}
-<div class="job-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px">
+        <!-- FILE UPLOAD -->
+        <div class="space-y-2">
 
-<h3>
-    Job #{{ job.id }}
-    — {{ job.status }}
-    — {{ job.progress }}%
-</h3>
+            <label class="text-sm font-medium text-gray-700">
+                {{ form.file.label.text }}
+            </label>
 
-{% if job.status == "processing" %}
-    <p>⏳ {{ job.step }}</p>
+            <!-- hidden real input -->
+            {{ form.file(class="hidden", id="fileInput") }}
 
-{% elif job.status == "failed" %}
-    <p style="color:red">❌ Failed</p>
+            <!-- custom button -->
+            <button type="button"
+                    onclick="document.getElementById('fileInput').click()"
+                    class="w-full border border-dashed border-gray-300
+                           rounded-lg py-6 text-gray-500 hover:bg-gray-50">
+                Choose Video File
+            </button>
 
-{% elif job.status == "finished" and clips %}
-    <h4>🎬 Clips Ready</h4>
+            <p id="fileName" class="text-sm text-gray-500">
+                No file selected
+            </p>
+        </div>
 
-    {% for clip in clips %}
-        <video controls width="360" height="240">
-            <source src="{{ url_for('clipper.clipper_stream',
-                            job_id=job.id,
-                            filename=clip) }}">
-        </video>
+        <!-- DIVIDER -->
+        <div class="flex items-center gap-4">
+            <div class="flex-1 border-t"></div>
+            <span class="text-gray-400 text-sm font-medium">OR</span>
+            <div class="flex-1 border-t"></div>
+        </div>
 
-        <br>
-        <a href="{{ url_for('clipper.clipper_download',
-                            job_id=job.id,
-                            filename=clip) }}">
-            ⬇ Download
-        </a>
-        <hr>
-    {% endfor %}
+        <!-- URL INPUT -->
+        <div class="space-y-2">
+            <label class="text-sm font-medium text-gray-700">
+                {{ form.video_url.label.text }}
+            </label>
 
-{% else %}
-    <small>⏳ Waiting…</small>
-{% endif %}
+            {{ form.video_url(
+                class="w-full border rounded-lg px-4 py-3
+                       focus:ring-2 focus:ring-black focus:outline-none",
+                placeholder="Paste YouTube / TikTok link"
+            ) }}
+        </div>
 
-<br><br>
-<button 
-    class="delete-job-btn"
-    data-job-id="{{ job.id }}"
-    data-job-type="clipper"
->
-    🗑 Delete
-</button>
+        <!-- ASPECT RATIO -->
+        <div class="space-y-2">
+            <label class="text-sm font-medium text-gray-700">
+                {{ form.aspectRatio.label.text }}
+            </label>
 
-</div>
-{% endif %}
-{% endfor %}
+            {{ form.aspectRatio(
+                class="w-full border rounded-lg px-4 py-3
+                       focus:ring-2 focus:ring-black focus:outline-none"
+            ) }}
+        </div>
 
-{% if not session.get("user_id") %}
-<script>
-document.addEventListener("DOMContentLoaded", () => {
+        <!-- SUBMIT -->
+        {{ form.submit(
+            class="w-full bg-black text-white py-3 rounded-lg
+                   hover:bg-gray-800 transition font-medium"
+        ) }}
 
-    const form = document.getElementById("uploadForm");
+    </form>
 
-    // redirect helper
-    const goRegister = (e) => {
-        e.preventDefault();
-        window.location.href = "/register";
-    };
+    <!-- ================= PROGRESS ================= -->
+    <div class="space-y-2">
+        <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+            <div id="bar"
+                 class="h-full bg-green-500 transition-all"
+                 style="width:0%">
+            </div>
+        </div>
+        <p id="statusText" class="text-sm text-gray-600">
+            Waiting...
+        </p>
+    </div>
 
-    // block submit button
-    form.addEventListener("submit", goRegister);
+    <!-- ================= JOB LIST ================= -->
+    <div class="space-y-6">
 
-    // block file picker
-    const fileInput = form.querySelector('input[type="file"]');
-    if (fileInput) {
-        fileInput.addEventListener("click", goRegister);
-    }
+        <h2 class="text-xl font-semibold">Your Clipper Videos</h2>
 
-    // optional: block URL field focus
-    const urlInput = form.querySelector('input[type="url"]');
-    if (urlInput) {
-        urlInput.addEventListener("focus", goRegister);
-    }
-});
-</script>
-{% endif %}
+        {% for item in jobs %}
+        {% set job = item.job %}
+        {% set clips = item.clips %}
+
+        {% if job.job_type == "clipper" %}
+
+        <div class="border rounded-xl p-5 space-y-4">
+
+            <h3 class="font-medium">
+                Job #{{ job.id }}
+                — {{ job.status }}
+                — {{ job.progress }}%
+            </h3>
+
+            {% if job.status == "processing" %}
+                <p>⏳ {{ job.step }}</p>
+
+            {% elif job.status == "failed" %}
+                <p class="text-red-500">❌ Failed</p>
+
+            {% elif job.status == "finished" and clips %}
+
+                <h4 class="font-medium">🎬 Clips Ready</h4>
+
+                {% for clip in clips %}
+                    <div class="space-y-2">
+                        <video controls class="rounded-lg w-full max-w-md">
+                            <source src="{{ url_for('clipper.clipper_stream',
+                                job_id=job.id,
+                                filename=clip) }}">
+                        </video>
+
+                        <a class="text-sm text-blue-600 hover:underline"
+                           href="{{ url_for('clipper.clipper_download',
+                               job_id=job.id,
+                               filename=clip) }}">
+                            ⬇ Download
+                        </a>
+                    </div>
+                {% endfor %}
+
+            {% else %}
+                <small class="text-gray-500">⏳ Waiting…</small>
+            {% endif %}
+
+            <button
+                class="delete-job-btn text-sm text-red-500 hover:text-red-700"
+                data-job-id="{{ job.id }}"
+                data-job-type="clipper">
+                🗑 Delete
+            </button>
+
+        </div>
+
+        {% endif %}
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -265,6 +290,6 @@ document.addEventListener("DOMContentLoaded", () => {
     </script>
 
 
-</body>
+</section>
 
 </html>

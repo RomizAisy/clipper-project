@@ -1,6 +1,6 @@
 {% extends "_base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Auto Subtitle{% endblock %}
 
 {% block content %}
 
@@ -10,16 +10,15 @@
     <div class="text-center space-y-6 mb-10">
 
         <h3 class="text-1xl md:text-1xl font-semibold tracking-tight leading-tight">
-            BEST CLIPPER TOOL
+            AUTO SUBTITLE TOOL
         </h3>
 
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
-            Turn Long Videos Into Short Clips Automatically
+            Add Subtitle in One Click
         </h1>
 
         <p class="text-gray-500 max-w-2xl mx-auto">
-            Upload a video or paste a link. Our AI detects the best moments
-            and generates ready-to-post short clips instantly.
+            Upload a video or paste a link. We will add animated subtitle in your videos.
         </p>
 
     </div>
@@ -29,20 +28,20 @@
     <div class="shadow-xl rounded-4xl p-6 md:p-8 max-w-3xl mx-auto">
 
         <form id="uploadForm"
-              action="/clipper-video"
-              method="POST"
-              enctype="multipart/form-data"
-              class="space-y-6">
+            method="POST"
+            action="/add-subtitle"
+            enctype="multipart/form-data"
+            class="space-y-6 max-w-2xl mx-auto">
 
-            {{ clipper_form.hidden_tag() }}
+            {{ form.hidden_tag() }}
 
-            <!-- INLINE INPUT ROW -->
+            <!-- FILE UPLOAD -->
             <div class="flex justify-center">
                 <div class="flex items-center gap-4 w-full max-w-2xl">
 
                     <!-- URL INPUT -->
                     <div class="flex-[3]">
-                        {{ clipper_form.video_url(
+                        {{ form.video_url(
                             class="w-full border border-gray-300 rounded-lg px-4 py-3
                                    focus:ring-2 focus:ring-black focus:outline-none",
                             placeholder="Paste YouTube / TikTok link"
@@ -60,19 +59,31 @@
                         Upload File
                         </a>
                     </div>
-
                 </div>
             </div>
 
-            <!-- SUBMIT -->
-            <div class="max-w-2xl mx-auto">
-                {{ clipper_form.submit(
+            <!-- SUBTITLE STYLE -->
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">
+                    {{ form.subtitleStyle.label.text }}
+                </label>
+
+                {{ form.subtitleStyle(
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3
+                        focus:ring-2 focus:ring-black focus:outline-none"
+                ) }}
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <div>
+                {{ form.submit(
                     class="w-full bg-black text-white py-3 rounded-lg
-                           hover:bg-gray-800 transition font-medium"
+                        hover:bg-gray-800 transition font-medium"
                 ) }}
             </div>
 
         </form>
+
 
     </div>
 
@@ -88,7 +99,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const form = document.getElementById("uploadForm");
-    if (!form) return;
 
     form.addEventListener("click", (e) => {
         e.preventDefault();

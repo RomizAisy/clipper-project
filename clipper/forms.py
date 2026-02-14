@@ -16,4 +16,4 @@ class ClipperFileForm(FlaskForm):
                                          ('original', 'Original')], 
                                          default= 'original'
     )
-    submit = SubmitField("Upload File")
+    submit = SubmitField("Process")

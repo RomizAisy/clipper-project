@@ -14,50 +14,83 @@
 
     {% block head_extra %}{% endblock %}
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col antialiased">
+<body class="bg-gray-50 min-h-screen flex flex-col antialiased">
 
-    <!-- Navbar -->
-    <nav class="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
-        <div>
-            <a href="/" class="text-lg font-semibold hover:text-gray-300">
-                    🎬 Clippera
-            </a>
-        </div>
+<!-- Navbar -->
+<nav class="sticky top-0 z-50 bg-gray-900 text-white">
+
+  <!-- NAV ROW -->
+  <div class="lg:grid lg:grid-cols-[auto_1fr_auto] lg:items-center px-6 py-4 flex justify-between">
+
+    <!-- LOGO -->
+    <div class="">
+      <a href="/" class="text-lg font-semibold hover:text-gray-300">
+        🎬 Clippera
+      </a>
+    </div>
+
+    <!-- CENTER MENU (desktop) -->
+    <div class="hidden lg:flex justify-center space-x-6">
+      <a href="/auto-clipper" class="hover:text-gray-300">Auto Clipper</a>
+      <a href="/auto-subtitle" class="hover:text-gray-300">Auto Subtitle</a>
+      <a href="/aspect-ratio" class="hover:text-gray-300">Aspect Ratio</a>
+      <a href="/price" class="hover:text-gray-300">Pricing</a>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="flex justify-end items-center gap-4">
+      <!-- Desktop buttons -->
+      <div class="lg:flex hidden gap-4">
+        {% if session.get("user_id") %}
+            <a href="/buytoken" class="text-center bg-white text-black hover:bg-black hover:text-white px-4 py-2 text-sm rounded-md font-medium">Buy Token</a>
+          <a href="/logout" class="hover:bg-white hover:text-black px-4 py-2 text-sm rounded-md font-medium">
+            Logout
+          </a>
+        {% else %}
+          <a href="/login" class="text-center bg-black text-white px-4 py-2 text-sm rounded-md font-medium">
+            Login
+          </a>
+          <a href="/register"
+             class="block text-center bg-white text-black hover:bg-black hover:text-white px-4 py-2 text-sm rounded-md  font-medium">
+            Signup for Free Token
+          </a>
+        {% endif %}
         
-        <div class="flex items-center space-x-6">
-            <a href="/auto-clipper" class="hover:text-gray-300">
-                Auto Clipper
-            </a>
-            <a href="/auto-subtitle" class="hover:text-gray-300">
-                Auto Subtitle
-            </a>
-            <a href="/aspect-ratio" class="hover:text-gray-300">
-                Aspect Ratio
-            </a>
-        </div>
+        
+      </div>
+      <button id="menuBtn" class="lg:hidden">
+        ☰
+      </button>
+    
+      
+    </div>
+  </div>
 
-        <div class="flex items-center space-x-4">
-            {% if session.get("user_id") %}
-                <a href="/logout"
-                   class="hover:bg-white hover:text-black px-4 py-2 rounded-md text-sm font-medium">
-                    Logout
-                </a>
-                <a href="{{ url_for('payment.buytokenpage') }}"
-                class="text-black bg-white hover:bg-black hover:text-white px-4 py-2 rounded-md text-sm  font-medium">
-                    Buy Token
-                </a>
-            {% else %}
-                <a href="/login"
-                   class="text-black bg-white hover:bg-black hover:text-white px-4 py-2 rounded-md text-sm  font-medium">
-                    Login
-                </a>
-                <a href="/register"
-                   class="text-white hover:bg-white hover:text-black px-4 py-2 rounded-md text-sm  font-medium">
-                    Signup for Free Token
-                </a>
-            {% endif %}
-        </div>
-    </nav>
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="hidden px-6 py-4 space-y-4 border-t border-gray-700 md:hidden text-center">
+    <a href="/auto-clipper" class="block">Auto Clipper</a>
+    <a href="/auto-subtitle" class="block">Auto Subtitle</a>
+    <a href="/aspect-ratio" class="block">Aspect Ratio</a>
+    <a href="/pricing" class="block">Pricing</a>
+    
+
+    <!-- Mobile Hamburger -->
+      
+
+    {% if session.get("user_id") %}
+      <a href="/logout" class="block text-center">Logout</a>
+      <a href="/buytoken" class="block text-center">Buy Token</a>
+    {% else %}
+      <a href="/login" class="block text-center bg-white text-black py-2 rounded">
+        Login
+      </a>
+    {% endif %}
+  </div>
+</nav>
+
+<input type="hidden" name="csrf_token" value="{{ form.csrf_token() }}">
+
+
 
     <!-- Main Content -->
     <main class="flex-1 container mx-auto px-6 py-10">
@@ -82,9 +115,20 @@
     <footer class="bg-white text-center py-6 text-sm text-gray-500 border-t">
         © 2026 VideoTool — Built with Flask + FFmpeg
     </footer>
+{% block scripts %}{% endblock %}
 
-    {% block scripts %}
-    {% endblock %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("menuBtn");
+    const menu = document.getElementById("mobileMenu");
+
+    btn?.addEventListener("click", () => {
+        menu.classList.toggle("hidden");
+        menu.classList.toggle("animate-slideDown");
+    });
+});
+</script>
+
 
 </body>
 </html>

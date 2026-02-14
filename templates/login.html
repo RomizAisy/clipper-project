@@ -1,34 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
+{% block title %}Register{% endblock %}
 
-<body>
-    <h1>Flask Login Page</h1>
+{% block content %}
 
-    <form action="/login" method="POST">
-        {{form.csrf_token}}
-        {{form.username.label}}
-        {{form.username(size=20)}}
-        {{form.password.label}}
-        {{form.password}}
-        <input type="submit" value="Login">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul class=flashes>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+<section class="bg-gray-50 min-h-screen flex justify-center items-start pt-16 md:pt-24">
+
+    <div class="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 space-y-6">
+
+        <!-- HEADER -->
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl font-bold">Login</h1>
+            <p class="text-gray-500 text-sm">
+                Start creating clips and subtitles instantly.
+            </p>
+        </div>
+
+        <!-- FORM -->
+        <form action="/login" method="POST" class="space-y-4">
+            {{ form.hidden_tag() }}
+
+            <!-- USERNAME -->
+            <div class="space-y-1">
+                <label class="text-sm font-medium text-gray-700">
+                    {{ form.username.label.text }}
+                </label>
+                {{ form.username(
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3
+                           focus:ring-2 focus:ring-black focus:outline-none"
+                ) }}
+
+                {% for error in form.username.errors %}
+                    <p class="text-red-500 text-sm">{{ error }}</p>
+                {% endfor %}
+                </div>
+
+            <!-- PASSWORD -->
+            <div class="space-y-1">
+                <label class="text-sm font-medium text-gray-700">
+                    {{ form.password.label.text }}
+                </label>
+                {{ form.password(
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3
+                           focus:ring-2 focus:ring-black focus:outline-none"
+                ) }}
+            </div>
+
+            <!-- SUBMIT -->
+            <button
+                type="submit"
+                class="w-full bg-black text-white py-3 rounded-lg
+                       hover:bg-gray-800 transition font-medium">
+                Login
+            </button>
+        </form>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for category, message in messages %}
+                        <div class="text-sm px-4 py-2 rounded-lg
+                                    {% if category == 'error' %}
+                                        bg-red-100 text-red-700
+                                    {% else %}
+                                        bg-green-100 text-green-700
+                                    {% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endwith %}
-    </form>
-    <a href="{{url_for('home')}}">Back to Homepage</a>
-    <a href="{{url_for('auth.register')}}">Go to Register</a>
-</body>
 
-</html>
+        <!-- LINKS -->
+        <div class="text-center text-sm text-gray-500 space-y-1">
+            <a href="{{ url_for('auth.register') }}" class="underline">
+                Register For Free Token
+            </a>
+            <br>
+            <a href="{{ url_for('home') }}" class="underline">
+                ← Back to Homepage
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

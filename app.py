@@ -25,6 +25,8 @@ from dotenv import load_dotenv, find_dotenv
 
 
 
+from flask_wtf import FlaskForm
+
 
 
 load_dotenv(find_dotenv())
@@ -44,22 +46,68 @@ db.init_app(app)
 migrate.init_app(app, db)
 mail.init_app(app)
 
+class CSRFOnlyForm(FlaskForm):
+    pass
+
 @app.route('/')
 def home():
     clipper_form = ClipperFileForm()
+    form = CSRFOnlyForm()  
+
     user = None
     tokens = 0
-    jobs = [] 
-    
+    jobs_autosub = []
+    jobs_clipper = []
+    jobs_aspect = []
+
     if "user_id" in session:
         user = User.query.filter_by(username=session["username"]).first()
+        user_obj = User.query.get(session["user_id"])
+
+        # Clean old jobs
         cleanup_old_jobs(days=5)
-        if user:
-            tokens = user.tokens
-        jobs = get_user_jobs_with_outputs(session["user_id"])
-        return render_template("dashboard.html")
-        
-    return render_template("home.html", user=user, tokens=tokens, jobs = jobs, clipper_form = clipper_form)
+
+        if user_obj:
+            tokens = user_obj.tokens
+
+            # Get jobs with outputs
+            jobs = get_user_jobs_with_outputs(session["user_id"])
+
+            # Separate jobs by type
+            for item in jobs:
+                job = item['job']
+                clips = item.get('clips', [])
+
+                job_item = {"job": job, "clips": clips}
+
+                if job.job_type == "autosub":
+                    jobs_autosub.append(job_item)
+                elif job.job_type == "clipper":
+                    jobs_clipper.append(job_item)
+                elif job.job_type == "aspect":
+                    jobs_aspect.append(job_item)
+
+        return render_template(
+            "dashboard.html",
+            user=user,
+            tokens=tokens,
+            jobs_autosub=jobs_autosub,
+            jobs_clipper=jobs_clipper,
+            jobs_aspect=jobs_aspect,
+            form=form  # always pass form
+        )
+
+    # For guests
+    return render_template(
+        "home.html",
+        user=user,
+        tokens=tokens,
+        jobs_autosub=jobs_autosub,
+        jobs_clipper=jobs_clipper,
+        jobs_aspect=jobs_aspect,
+        clipper_form=clipper_form,
+        form=form  # always pass form
+    )
 
 
 

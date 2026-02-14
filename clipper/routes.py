@@ -1,5 +1,5 @@
 from .forms import ClipperFileForm
-import os, tempfile, time, traceback
+import os, tempfile, time, traceback, shutil
 from werkzeug.utils import secure_filename
 from threading import Thread
 
@@ -33,11 +33,16 @@ def auto_clipper():
 
     if user_id:
         jobs = get_user_jobs_with_outputs(user_id)
+        return render_template(
+            "autoClipper.html",
+            form=form,
+            jobs=jobs
+            )
     else:
         jobs = []  # guest has no jobs
 
     return render_template(
-        "autoClipper.html",
+        "guestClipper.html",
         form=form,
         jobs=jobs
     )
@@ -47,10 +52,7 @@ def auto_clipper():
 def clipper():
     form = ClipperFileForm()
     if "user_id" not in session:
-        return jsonify({
-            "error": "Unauthorized",
-            "redirect": url_for("/register")
-        }), 401
+        return redirect(url_for("auth.register"))
 
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400
@@ -331,8 +333,7 @@ def clipper_download(job_id, filename):
         as_attachment=True
     )
 
-import shutil
-from flask import abort, jsonify
+
 
 @clipper_bp.route("/clipper-delete/<int:job_id>", methods=["POST"])
 def delete_job(job_id):
@@ -354,3 +355,7 @@ def delete_job(job_id):
     db.session.commit()
 
     return jsonify({"message": "Job deleted"})
+
+
+
+
