@@ -58,7 +58,18 @@
         <p id="statusText">Waiting...</p>
     </div>
 
-<h2>Your Auto Subtitle Videos</h2>
+{% if session.get("user_id") %}
+    <h2>Your Auto Subtitle Videos</h2>
+
+    {% for job in jobs %}
+        ...
+    {% endfor %}
+{% else %}
+    <p class="text-gray-500">
+        Login to see your processed videos.
+    </p>
+{% endif %}
+
 
 {% for item in jobs %}
 {% set job = item.job %}
@@ -105,7 +116,16 @@
 
 
 
-
+    {% if not session.get("user_id") %}
+    <script>
+    document.querySelector("form").addEventListener("click", (e) => {
+        if (e.target.type === "submit") {
+            e.preventDefault();
+            window.location.href = "/register";
+        }
+    });
+    </script>
+    {% endif %}
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // On page load: resume polling if a job was in progress

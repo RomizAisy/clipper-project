@@ -7,6 +7,7 @@ from config import Config
 from extensions import db, migrate, mail
 
 from models import User, Admin, Transaction
+from clipper.forms import ClipperFileForm
 
 from auth import auth_bp
 from payment import payment_bp
@@ -45,6 +46,7 @@ mail.init_app(app)
 
 @app.route('/')
 def home():
+    clipper_form = ClipperFileForm()
     user = None
     tokens = 0
     jobs = [] 
@@ -55,8 +57,9 @@ def home():
         if user:
             tokens = user.tokens
         jobs = get_user_jobs_with_outputs(session["user_id"])
+        return render_template("dashboard.html")
         
-    return render_template("home.html", user=user, tokens=tokens, jobs = jobs)
+    return render_template("home.html", user=user, tokens=tokens, jobs = jobs, clipper_form = clipper_form)
 
 
 

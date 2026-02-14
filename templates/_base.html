@@ -14,7 +14,7 @@
 
     {% block head_extra %}{% endblock %}
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col antialiased">
 
     <!-- Navbar -->
     <nav class="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
@@ -25,25 +25,26 @@
         </div>
         
         <div class="flex items-center space-x-6">
-
-            {% if session.get("user_id") %}
-                <a href="/auto-clipper" class="hover:text-gray-300">
-                    Auto Clipper
-                </a>
-                <a href="/auto-subtitle" class="hover:text-gray-300">
-                    Auto Subtitle
-                </a>
-                <a href="/aspect-ratio" class="hover:text-gray-300">
-                    Aspect Ratio
-                </a>
-            {% endif %}
+            <a href="/auto-clipper" class="hover:text-gray-300">
+                Auto Clipper
+            </a>
+            <a href="/auto-subtitle" class="hover:text-gray-300">
+                Auto Subtitle
+            </a>
+            <a href="/aspect-ratio" class="hover:text-gray-300">
+                Aspect Ratio
+            </a>
         </div>
 
         <div class="flex items-center space-x-4">
             {% if session.get("user_id") %}
                 <a href="/logout"
-                   class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-sm font-medium">
+                   class="hover:bg-white hover:text-black px-4 py-2 rounded-md text-sm font-medium">
                     Logout
+                </a>
+                <a href="{{ url_for('payment.buytokenpage') }}"
+                class="text-black bg-white hover:bg-black hover:text-white px-4 py-2 rounded-md text-sm  font-medium">
+                    Buy Token
                 </a>
             {% else %}
                 <a href="/login"

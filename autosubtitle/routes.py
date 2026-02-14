@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, session, jsonify, abort, send_from_directory, flash, request
+from flask import Blueprint, render_template, redirect, session, jsonify, abort, send_from_directory, flash, request, url_for
 from .forms import AutosubFileForm
 from werkzeug.utils import secure_filename
 
@@ -27,15 +27,18 @@ autosub_bp = Blueprint("autosub", __name__)
 @autosub_bp.route("/auto-subtitle")
 def autosub_page():
 
-    if "user_id" not in session:
-        return redirect("/login")
     form = AutosubFileForm()
-    
-    jobs = get_user_jobs_with_outputs(session["user_id"])
-    
+
+    user_id = session.get("user_id")  # ✅ safe access
+
+    if user_id:
+        jobs = get_user_jobs_with_outputs(user_id)
+    else:
+        jobs = []  # guest has no jobs
+
     return render_template(
         "autoSubtitle.html",
-        form=form, 
+        form=form,
         jobs=jobs
     )
 
@@ -43,7 +46,10 @@ def autosub_page():
 def add_subtitle():
     form = AutosubFileForm()
     if "user_id" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
+        return jsonify({
+            "error": "Unauthorized",
+            "redirect": url_for("/register")
+        }), 401
 
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400

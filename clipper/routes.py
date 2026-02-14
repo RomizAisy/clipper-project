@@ -26,12 +26,16 @@ clipper_bp = Blueprint("clipper", __name__ )
 
 @clipper_bp.route("/auto-clipper")
 def auto_clipper():
-    if "user_id" not in session:
-        return redirect("/login")
 
     form = ClipperFileForm()
-    jobs = get_user_jobs_with_outputs(session["user_id"])
-    
+
+    user_id = session.get("user_id")  # ✅ safe access
+
+    if user_id:
+        jobs = get_user_jobs_with_outputs(user_id)
+    else:
+        jobs = []  # guest has no jobs
+
     return render_template(
         "autoClipper.html",
         form=form,
@@ -43,7 +47,10 @@ def auto_clipper():
 def clipper():
     form = ClipperFileForm()
     if "user_id" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
+        return jsonify({
+            "error": "Unauthorized",
+            "redirect": url_for("/register")
+        }), 401
 
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400

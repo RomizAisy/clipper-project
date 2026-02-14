@@ -109,7 +109,35 @@
 {% endif %}
 {% endfor %}
 
+{% if not session.get("user_id") %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
+    const form = document.getElementById("uploadForm");
+
+    // redirect helper
+    const goRegister = (e) => {
+        e.preventDefault();
+        window.location.href = "/register";
+    };
+
+    // block submit button
+    form.addEventListener("submit", goRegister);
+
+    // block file picker
+    const fileInput = form.querySelector('input[type="file"]');
+    if (fileInput) {
+        fileInput.addEventListener("click", goRegister);
+    }
+
+    // optional: block URL field focus
+    const urlInput = form.querySelector('input[type="url"]');
+    if (urlInput) {
+        urlInput.addEventListener("focus", goRegister);
+    }
+});
+</script>
+{% endif %}
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {

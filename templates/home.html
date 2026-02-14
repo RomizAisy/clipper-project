@@ -4,149 +4,137 @@
 
 {% block content %}
 
-<div class="space-y-6">
+<section class="max-w-5xl mx-auto px-6 py-20">
 
-    <h1 class="text-4xl font-bold text-amber-400">Dashboard</h1>
+    <!-- HERO TEXT -->
+    <div class="text-center space-y-6 mb-12">
 
-    <!-- Navigation Links -->
-    <div class="flex flex-wrap gap-4">
-        <a href="{{ url_for('payment.buytokenpage') }}"
-           class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg">
-            Buy Token
-        </a>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
+            Turn Long Videos Into Short Clips Automatically
+        </h1>
 
-        <a href="{{ url_for('clipper.auto_clipper') }}"
-           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
-            Auto Clipper
-        </a>
+        <p class="text-gray-500 max-w-2xl mx-auto">
+            Upload a video or paste a link. Our AI will detect the best moments
+            and generate ready-to-post short clips.
+        </p>
 
-        <a href="{{ url_for('autosub.autosub_page') }}"
-           class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
-            Auto Subtitle
-        </a>
-
-        <a href="{{ url_for('aspect.aspect_page') }}"
-           class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
-            Aspect Ratio
-        </a>
-
-        <a href="{{ url_for('auth.admin') }}"
-           class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg">
-            Admin
-        </a>
     </div>
 
-    {% if session.user_id %}
 
-        <div class="bg-white p-6 rounded-xl shadow">
-            <h2 class="text-xl font-semibold">Welcome, {{ session.username }}</h2>
-            <p class="text-gray-600">Tokens: {{ tokens }}</p>
-        </div>
+    <!-- FORM CARD -->
+    <div class="bg-white shadow-lg rounded-2xl p-8 max-w-2xl mx-auto">
 
-        <h2 class="text-2xl font-bold mt-6 text-amber-900">Your Videos</h2>
+        <form id="uploadForm"
+              action="/clipper-video"
+              method="POST"
+              enctype="multipart/form-data"
+              class="space-y-6">
 
-        <div class="space-y-6">
+            {{ clipper_form.hidden_tag() }}
 
-        {% for item in jobs %}
-        {% set job = item.job %}
-        {% set clips = item.clips %}
+            <!-- FILE UPLOAD -->
+            <div class="space-y-2">
+                <label class="font-medium text-sm text-gray-700">
+                    {{ clipper_form.file.label.text }}
+                </label>
 
-        <div class="bg-white p-6 rounded-xl shadow">
+                <div class="border-2 border-dashed border-gray-300
+                            rounded-xl p-8 text-center
+                            hover:border-black transition">
 
-            <h3 class="font-semibold mb-2">
-                Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
-            </h3>
+                    {{ clipper_form.file(class="block w-full text-sm
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-lg file:border-0
+                        file:bg-black file:text-white
+                        hover:file:bg-gray-800") }}
 
-            {% if job.status == "processing" %}
-                <p class="text-yellow-600">⏳ {{ job.step }}</p>
-            {% endif %}
-
-            <!-- Auto Subtitle -->
-            {% if job.job_type == "autosub" and job.status == "finished" %}
-                <h4 class="font-medium mt-4">📝 Auto Subtitled Video</h4>
-
-                <video class="mt-2 rounded-lg" width="360" controls>
-                    <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}" type="video/mp4">
-                </video>
-
-                <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}"
-                   class="block mt-2 text-blue-600 hover:underline">
-                    Download Subtitled Video
-                </a>
-            {% endif %}
-
-            <!-- Aspect -->
-            {% if job.job_type == "aspect" and job.status == "finished" %}
-                <h4 class="font-medium mt-4">📐 Aspect Ratio Converted</h4>
-
-                <video class="mt-2 rounded-lg" width="360" controls>
-                    <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}" type="video/mp4">
-                </video>
-
-                <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}"
-                   class="block mt-2 text-blue-600 hover:underline">
-                    Download Video
-                </a>
-            {% endif %}
-
-            <!-- Clipper -->
-            {% if job.job_type == "clipper" and clips %}
-                <h4 class="font-medium mt-4">🎬 Clips</h4>
-
-                {% for clip in clips %}
-                    <video class="mt-2 rounded-lg" width="360" controls>
-                        <source src="{{ url_for('clipper.clipper_stream',
-                                        job_id=job.id,
-                                        filename=clip) }}">
-                    </video>
-
-                    <a href="{{ url_for('clipper.clipper_download',
-                                        job_id=job.id,
-                                        filename=clip) }}"
-                       class="block mt-1 text-blue-600 hover:underline">
-                        Download
-                    </a>
-                {% endfor %}
-            {% endif %}
-
-            <button
-                class="delete-job-btn mt-4 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
-                data-job-id="{{ job.id }}">
-                🗑 Delete
-            </button>
-
-        </div>
-
-        {% endfor %}
-        </div>
-
-    {% else %}
-
-        <div class="bg-white p-6 rounded-xl shadow">
-            <h2 class="text-xl font-semibold">Welcome, Guest</h2>
-            <p class="text-gray-600">Tokens: {{ tokens }}</p>
-
-            <div class="mt-4 space-x-4">
-                <a href="{{ url_for('auth.login') }}"
-                   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
-                    Login
-                </a>
-
-                <a href="{{ url_for('auth.register') }}"
-                   class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
-                    Register
-                </a>
+                    <p class="text-gray-400 text-sm mt-2">
+                        Drag & drop or choose a video file
+                    </p>
+                </div>
             </div>
-        </div>
 
-    {% endif %}
+            <!-- DIVIDER -->
+            <div class="flex items-center gap-4">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-gray-400 text-sm">OR</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
 
-</div>
+            <!-- VIDEO URL -->
+            <div class="space-y-2">
+                <label class="font-medium text-sm text-gray-700">
+                    {{ clipper_form.video_url.label.text }}
+                </label>
+
+                {{ clipper_form.video_url(
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3
+                           focus:ring-2 focus:ring-black focus:outline-none",
+                    placeholder="Paste YouTube / TikTok link"
+                ) }}
+            </div>
+
+            <!-- ASPECT RATIO -->
+            <div class="space-y-2">
+                <label class="font-medium text-sm text-gray-700">
+                    {{ clipper_form.aspectRatio.label.text }}
+                </label>
+
+                {{ clipper_form.aspectRatio(
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3
+                           focus:ring-2 focus:ring-black focus:outline-none"
+                ) }}
+            </div>
+
+            <!-- SUBMIT -->
+            <div class="pt-4">
+                {{ clipper_form.submit(
+                    class="w-full bg-black text-white py-3 rounded-lg
+                           hover:bg-gray-800 transition font-medium"
+                ) }}
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+
 
 {% endblock %}
 
 
 {% block scripts %}
+{% if not session.get("user_id") %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.getElementById("uploadForm");
+
+    // redirect helper
+    const goRegister = (e) => {
+        e.preventDefault();
+        window.location.href = "/register";
+    };
+
+    // block submit button
+    form.addEventListener("submit", goRegister);
+
+    // block file picker
+    const fileInput = form.querySelector('input[type="file"]');
+    if (fileInput) {
+        fileInput.addEventListener("click", goRegister);
+    }
+
+    // optional: block URL field focus
+    const urlInput = form.querySelector('input[type="url"]');
+    if (urlInput) {
+        urlInput.addEventListener("focus", goRegister);
+    }
+});
+</script>
+{% endif %}
 <script>
 document.addEventListener("click", async (e) => {
     if (!e.target.classList.contains("delete-job-btn")) return;
