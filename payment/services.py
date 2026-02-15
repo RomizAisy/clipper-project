@@ -26,6 +26,6 @@ def create_transaction_payload(user, trx, package_name):
             "id": package_name,
             "price": trx.amount,
             "quantity": 1,
-            "name": f"{trx.tokens} Tokens"
+            "name": f"{trx.plan} plan purchase"
         }]
     }

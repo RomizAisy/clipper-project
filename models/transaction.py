@@ -9,7 +9,8 @@ class Transaction(db.Model):
         db.ForeignKey("users.id"),
         nullable=False
     )
-    tokens = db.Column(db.Integer, nullable=False)   # tokens bought
+    plan = db.Column(db.String(20))
+#    tokens = db.Column(db.Integer, nullable=False)   # tokens bought
     amount = db.Column(db.Integer, nullable=False)   # price paid
 
     status = db.Column(

@@ -95,13 +95,15 @@
             Waiting...
         </p>
     </div>
-
+</section>
+<section>
+    
     <!-- ================= JOB LIST ================= -->
-    <div class="space-y-6">
+<div class="space-y-6">
 
-        <h2 class="text-xl font-semibold">Your Clipper Videos</h2>
+    <h2 class="text-xl font-semibold">Your Clipper Videos</h2>
 
-        {% for item in jobs %}
+    {% for item in jobs %}
         {% set job = item.job %}
         {% set clips = item.clips %}
 
@@ -110,9 +112,7 @@
         <div class="border rounded-xl p-5 space-y-4">
 
             <h3 class="font-medium">
-                Job #{{ job.id }}
-                — {{ job.status }}
-                — {{ job.progress }}%
+                Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
             </h3>
 
             {% if job.status == "processing" %}
@@ -122,25 +122,27 @@
                 <p class="text-red-500">❌ Failed</p>
 
             {% elif job.status == "finished" and clips %}
-
                 <h4 class="font-medium">🎬 Clips Ready</h4>
 
-                {% for clip in clips %}
-                    <div class="space-y-2">
-                        <video controls class="rounded-lg w-full max-w-md">
-                            <source src="{{ url_for('clipper.clipper_stream',
-                                job_id=job.id,
-                                filename=clip) }}">
-                        </video>
+                <!-- Grid container for clips -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {% for clip in clips %}
+                        <div class="space-y-2">
+                            <video controls class="rounded-lg w-full aspect-video object-contain">
+                                <source src="{{ url_for('clipper.clipper_stream',
+                                    job_id=job.id,
+                                    filename=clip) }}">
+                            </video>
 
-                        <a class="text-sm text-blue-600 hover:underline"
-                           href="{{ url_for('clipper.clipper_download',
-                               job_id=job.id,
-                               filename=clip) }}">
-                            ⬇ Download
-                        </a>
-                    </div>
-                {% endfor %}
+                            <a class="text-sm text-blue-600 hover:underline"
+                               href="{{ url_for('clipper.clipper_download',
+                                   job_id=job.id,
+                                   filename=clip) }}">
+                                ⬇ Download
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
 
             {% else %}
                 <small class="text-gray-500">⏳ Waiting…</small>
@@ -156,9 +158,9 @@
         </div>
 
         {% endif %}
-        {% endfor %}
+    {% endfor %}
 
-    </div>
+</div>
 
 </section>
 

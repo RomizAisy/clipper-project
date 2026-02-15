@@ -35,35 +35,34 @@
 
             {{ form.hidden_tag() }}
 
-            <!-- URL + FILE -->
+            <!-- FILE UPLOAD -->
             <div class="flex justify-center">
-                <div class="flex items-center gap-4 w-full">
+                <div class="flex items-center gap-4 w-full max-w-2xl">
 
+                    <!-- URL INPUT -->
                     <div class="flex-[3]">
                         {{ form.video_url(
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black",
-                        placeholder="Paste YouTube / TikTok link"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3
+                                   focus:ring-2 focus:ring-black focus:outline-none",
+                            placeholder="Paste YouTube / TikTok link"
                         ) }}
                     </div>
 
-                    <div class="text-gray-400 text-sm font-medium">
+                    <!-- OR -->
+                    <div class="text-gray-400 text-sm font-medium whitespace-nowrap">
                         OR
                     </div>
 
-                    <div class="flex items-center space-x-2">
-                        {{ form.file(class="hidden", id="fileInput") }}
-
-                        <label for="fileInput" class="bg-black text-white px-4 py-2 rounded-lg cursor-pointer">
-                            Upload File
-                        </label>
-
-                        <span id="fileName" class="text-gray-400 text-sm"></span>
+                    <!-- FILE INPUT -->
+                     <div class="flex-[1]">
+                        <a href="/register" class="bg-black text-white px-4 py-2 rounded-lg cursor-pointer">
+                        Upload File
+                        </a>
                     </div>
-
                 </div>
             </div>
 
-            <!-- ASPECT RATIO -->
+            <!-- SUBTITLE STYLE -->
             <div class="space-y-2">
                 <label class="text-sm font-medium text-gray-700">
                     {{ form.aspectRatio.label.text }}
@@ -90,67 +89,13 @@
 
 </section>
 
-<!-- JOBS -->
-<section class="mx-auto px-6 pb-24">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        {% for item in jobs %}
-        {% set job = item.job %}
-
-        {% if job.job_type == "aspect" %}
-        <div class="job-card border p-4 rounded-lg bg-white shadow-sm">
-
-            <h3 class="font-semibold mb-2 ">
-                Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
-            </h3>
-
-            {% if job.status == "processing" %}
-            <p>⏳ {{ job.step }}</p>
-
-            {% elif job.status == "failed" %}
-            <p class="text-red-500">❌ Failed</p>
-
-            {% elif job.status == "finished" %}
-            <h4 class="mb-2">📝 Auto Subtitled Video</h4>
-
-            <div class="aspect-video bg-black rounded overflow-hidden">
-                <video controls class="w-full h-full object-contain">
-                    <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}">
-                </video>
-            </div>
-
-            <a class="block mt-3 text-blue-600 hover:underline text-sm" href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
-                Download
-            </a>
-
-            {% else %}
-            <small class="">⏳ Waiting…</small>
-            {% endif %}
-
-            <button class="delete-job-btn mt-4 text-sm text-red-500" data-job-id="{{ job.id }}">
-                🗑 Delete
-            </button>
-
-        </div>
-        {% endif %}
-        {% endfor %}
-
-    </div>
-
-</section>
 
 {% endblock %}
 
 
 {% block scripts %}
-
-
-
-
-
 {% if not session.get("user_id") %}
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const form = document.getElementById("uploadForm");
@@ -161,30 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
-
 </script>
 {% endif %}
 
 
 <script>
-document.getElementById("uploadForm").addEventListener("submit", async function(e) {
-    e.preventDefault(); // ⭐ STOP page redirect
-
-    const formData = new FormData(this);
-
-    const response = await fetch("/aspect-change", {
-        method: "POST",
-        body: formData
-    });
-
-    const data = await response.json();
-
-    // show result in same page
-    document.getElementById("jobResult").textContent = "refresh page";
-});
-
-
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const input = document.getElementById("fileInput");
@@ -225,7 +151,5 @@ document.addEventListener("click", async (e) => {
         alert("Error deleting job");
     }
 });
-
-
 </script>
 {% endblock %}

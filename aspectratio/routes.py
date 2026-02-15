@@ -23,14 +23,23 @@ aspect_bp = Blueprint( "aspect", __name__)
 
 @aspect_bp.route("/aspect-ratio")
 def aspect_page():
-    if "user_id" not in session:
-        return redirect("/login")
+    
 
     form = AspectFileForm()
-    jobs = get_user_jobs_with_outputs(session["user_id"])
+    user_id = session.get("user_id")  # ✅ safe acces
+
+    if user_id:
+        jobs = get_user_jobs_with_outputs(user_id)
+        return render_template(
+        "aspectRatio.html",
+        form=form,
+        jobs=jobs
+    )
+    else:
+        jobs = []  # guest has no jobs
     
     return render_template(
-        "aspectRatio.html",
+        "guestAspect.html",
         form=form,
         jobs=jobs
     )
@@ -198,7 +207,7 @@ def download_from_link(url, job_dir):
     return os.path.join(job_dir, f"input.{ext}")
 
 
-@aspect_bp.route("/clipper-status/<int:job_id>")
+@aspect_bp.route("/aspect-status/<int:job_id>")
 def aspect_status(job_id):
     if "user_id" not in session:
         abort(401)
