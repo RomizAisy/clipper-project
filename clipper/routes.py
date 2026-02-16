@@ -87,42 +87,12 @@ def clipper():
         save_path = os.path.join(job_dir, input_filename)        
         file.save(save_path)
 
-        if aspectRatio and aspectRatio != "original":
-            try:
-                convert_aspect(
-                    input_path=save_path,
-                    output_path=converted_path,
-                    ratio=aspectRatio
-                )
-                os.remove(save_path) 
-                save_path = converted_path 
-                 
-            except Exception as e:
-                return jsonify({"error": f"Aspect ratio conversion failed: {str(e)}"}), 500
 
     elif form.video_url.data:
         save_path = download_from_link(
             form.video_url.data,
             job_dir
         )
-        
-        if aspectRatio and aspectRatio != "original":
-            try:
-                convert_aspect(
-                    input_path=save_path,
-                    output_path=converted_path,
-                    ratio=aspectRatio
-                )
-
-                # optionally delete original to save space
-                os.remove(save_path)
-
-                save_path = converted_path   # continue pipeline with converted video
-
-            except Exception as e:
-                return jsonify({
-                    "error": f"Aspect ratio conversion failed: {str(e)}"
-                }), 500
 
     else:
         return jsonify({"error": "No video provided"}), 400
@@ -137,7 +107,8 @@ def clipper():
         job_dir=job_dir,
         original_filename=os.path.basename(save_path),
         job_type="clipper",
-        usage_charged=False
+        usage_charged=False,
+        aspect_ratio=aspectRatio
     )
 
     db.session.add(job)
@@ -213,6 +184,9 @@ def process_video_background(app, job_id, save_path, job_dir):
         job = VideoJob.query.get(job_id)
         user = User.query.get(job.user_id)
 
+        
+        aspect_ratio = job.aspect_ratio or "original"
+
         if not job.usage_charged:
             user.used_today += 1
             job.usage_charged = True
@@ -252,6 +226,28 @@ def process_video_background(app, job_id, save_path, job_dir):
                 clips=topic_clips,
                 output_dir=job_dir + "/clips"
             )
+
+            job.progress = 92
+            job.step = "formatting clips"
+            db.session.commit()
+
+            if aspect_ratio != "original":
+                converted_clips = []
+
+                for clip in final_clips:
+                    clip_path = clip["file"]
+
+                    converted = clip_path.replace(".mp4", "_converted.mp4")
+
+                    convert_aspect(
+                        input_path=clip_path,
+                        output_path=converted,
+                        ratio=aspect_ratio
+                    )
+                    os.replace(converted, clip_path)
+                    converted_clips.append(clip)
+
+                final_clips = converted_clips
 
             job.progress = 100
             job.step = "done"
