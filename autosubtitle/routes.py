@@ -288,7 +288,8 @@ def autosub_status(job_id):
     return jsonify({
         "status": job.status,
         "progress": job.progress,
-        "step": job.step
+        "step": job.step,
+        "job_id": job.id
     })
 
 @autosub_bp.route("/autosub-stream/<int:job_id>")

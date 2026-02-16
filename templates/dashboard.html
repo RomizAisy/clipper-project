@@ -32,13 +32,13 @@
                                 </video>
                                 <a href="{{ url_for('clipper.clipper_download', job_id=job.id, filename=clip) }}"
                                 class="block mt-1 text-blue-600 hover:underline">Download</a>
-                                <button class="delete-job-btn mt-2 text-sm text-red-500" data-job-id="{{ job.id }}">
-                                    🗑 Delete
-                                </button>
+                                
                             </div>
                         {% endfor %}
                     </div>
-                    
+                    <button class="delete-job-btn mt-4 text-sm text-red-500" data-job-id="{{ job.id }}">
+                🗑 Delete
+            </button>
                 {% endif %}
             </div>
         {% endfor %}
@@ -108,41 +108,30 @@
 {% endblock %}
 
 {% block scripts %}
+
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    document.addEventListener("click", async (e) => {
-        const btn = e.target.closest(".delete-job-btn");
-        if (!btn) return;
+document.addEventListener("click", async (e) => {
+    if (!e.target.classList.contains("delete-job-btn")) return;
 
-        const jobId = btn.dataset.jobId;
-        if (!confirm("Are you sure you want to delete this job?")) return;
+    const jobId = e.target.dataset.jobId;
 
-        try {
-            const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    if (!confirm("Are you sure you want to delete this job?")) return;
 
-            const res = await fetch(`/clipper-delete/${jobId}`, {
-                method: "POST",
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify({ job_id: jobId })
-            });
+    try {
+        const res = await fetch(`/clipper-delete/${jobId}`, { method: "POST" });
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                alert(data.error || `Failed to delete job (status ${res.status})`);
-                return;
-            }
-
-            btn.closest(".job-card").remove();
-
-        } catch (err) {
-            console.error(err);
-            alert("Error deleting job");
+        if (!res.ok) {
+            alert("Failed to delete job");
+            return;
         }
-    });
+
+        e.target.closest(".bg-white").remove();
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting job");
+    }
 });
+
+
 </script>
 {% endblock %}

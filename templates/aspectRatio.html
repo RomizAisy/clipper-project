@@ -53,12 +53,13 @@
                     <div class="flex items-center space-x-2">
                         {{ form.file(class="hidden", id="fileInput") }}
 
-                        <label for="fileInput" class="bg-black text-white px-4 py-2 rounded-lg cursor-pointer">
+                        <label id="uploadBtn" for="fileInput" class="bg-black text-white px-4 py-2 rounded-lg cursor-pointer">
                             Upload File
                         </label>
 
                         <span id="fileName" class="text-gray-400 text-sm"></span>
                     </div>
+                    <p id="fileStatus" class="text-sm text-gray-500"></p>
 
                 </div>
             </div>
@@ -77,13 +78,20 @@
 
             <!-- SUBMIT BUTTON -->
             <div>
-                {{ form.submit(
+                {{ form.submit( id="submitBtn",
                     class="w-full bg-black text-white py-3 rounded-lg
                         hover:bg-gray-800 transition font-medium"
                 ) }}
             </div>
 
         </form>
+
+        <div id="progressContainer" style="width:300px;border:1px solid #ccc; display:none;">
+            <div id="progressBar" style="height:20px;width:0%;background:green;"></div>
+            
+        </div>
+        <p id="progressText" class="text-sm text-gray-500 mt-2"></p>
+
 
 
     </div>
@@ -143,11 +151,6 @@
 
 
 {% block scripts %}
-
-
-
-
-
 {% if not session.get("user_id") %}
 <script>
 
@@ -167,21 +170,115 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <script>
-document.getElementById("uploadForm").addEventListener("submit", async function(e) {
-    e.preventDefault(); // ⭐ STOP page redirect
+    // FILE UPLOAD
+document.addEventListener("DOMContentLoaded", () => {
+
+    const input = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+    const fileStatus = document.getElementById("fileStatus");
+    const uploadBtn = document.getElementById("uploadBtn");
+
+    input.addEventListener("change", () => {
+
+        if (input.files.length > 0) {
+            const file = input.files[0];
+
+            // show filename
+            fileName.textContent = file.name;
+
+            // simulate preparing state
+            fileStatus.textContent = "Preparing file...";
+            uploadBtn.classList.add("opacity-70");
+
+            // small delay for UX feel
+            setTimeout(() => {
+                fileStatus.textContent = "✅ File ready";
+                uploadBtn.classList.remove("opacity-70");
+            }, 400);
+
+        } else {
+            fileName.textContent = "";
+            fileStatus.textContent = "";
+        }
+    });
+
+});
+document.getElementById("uploadForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
     const formData = new FormData(this);
 
-    const response = await fetch("/aspect-change", {
-        method: "POST",
-        body: formData
-    });
+    const submitBtn = document.getElementById("submitBtn");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
 
-    const data = await response.json();
+    // ✅ disable button + show loading
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Uploading...";
 
-    // show result in same page
-    document.getElementById("jobResult").textContent = "refresh page";
+    progressContainer.style.display = "block";
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/aspect-change", true);
+
+    // upload progress
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + "%";
+            progressText.innerText = `Uploading ${percent}%`;
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+
+        progressText.innerText = "Processing video...";
+        startJobPolling(data.job_id);
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit";
+            progressText.innerText = "Upload failed.";
+        }
+    };
+
+    xhr.send(formData);
 });
+
+function startJobPolling(jobId) {
+
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+
+    const interval = setInterval(async () => {
+
+        try {
+            const res = await fetch(`/aspect-status/${jobId}`);
+            const data = await res.json();
+
+            // update progress
+            progressBar.style.width = data.progress + "%";
+            progressText.innerText = data.step || "Processing...";
+
+            if (data.status === "finished") {
+                clearInterval(interval);
+                progressText.innerText = "✅ Finished!";
+                setTimeout(() => location.reload(), 1200);
+            }
+
+            if (data.status === "failed") {
+                clearInterval(interval);
+                progressText.innerText = "❌ Failed";
+            }
+
+        } catch (err) {
+            console.error(err);
+        }
+
+    }, 1500); // poll every 1.5s
+}
 
 
 

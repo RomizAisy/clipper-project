@@ -94,7 +94,9 @@ def clipper():
                     output_path=converted_path,
                     ratio=aspectRatio
                 )
-                save_path = converted_path   
+                os.remove(save_path) 
+                save_path = converted_path 
+                 
             except Exception as e:
                 return jsonify({"error": f"Aspect ratio conversion failed: {str(e)}"}), 500
 
@@ -113,7 +115,7 @@ def clipper():
                 )
 
                 # optionally delete original to save space
-                # os.remove(save_path)
+                os.remove(save_path)
 
                 save_path = converted_path   # continue pipeline with converted video
 
