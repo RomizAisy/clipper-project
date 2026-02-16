@@ -91,6 +91,7 @@ def home():
             "dashboard.html",
             user=user,
             tokens=tokens,
+            job=job,
             jobs_autosub=jobs_autosub,
             jobs_clipper=jobs_clipper,
             jobs_aspect=jobs_aspect,
