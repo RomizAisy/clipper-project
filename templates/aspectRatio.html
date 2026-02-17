@@ -106,45 +106,87 @@
         {% set job = item.job %}
 
         {% if job.job_type == "aspect" %}
-        <div class="job-card border p-4 rounded-lg bg-white shadow-sm">
+        <div class="group border rounded-2xl bg-white shadow-sm hover:shadow-md transition p-5 flex flex-col justify-between">
 
-            <h3 class="font-semibold mb-2 ">
-                Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
-            </h3>
+            <!-- HEADER -->
+            <div class="space-y-2">
+                <h3 class="font-semibold text-lg">
+                    Job #{{ job.id }}
+                </h3>
 
-            {% if job.status == "processing" %}
-            <p>⏳ {{ job.step }}</p>
+                <div class="text-sm text-gray-500 flex items-center gap-2">
+                    <span class="
+                        px-2 py-1 rounded-md text-xs
+                        {% if job.status == 'finished' %}
+                            bg-green-100 text-green-700
+                        {% elif job.status == 'processing' %}
+                            bg-yellow-100 text-yellow-700
+                        {% else %}
+                            bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ job.status }}
+                    </span>
 
-            {% elif job.status == "failed" %}
-            <p class="text-red-500">❌ Failed</p>
-
-            {% elif job.status == "finished" %}
-            <h4 class="mb-2">📝 Aspect Ratio Convert</h4>
-
-            <div class="aspect-video bg-black rounded overflow-hidden relative">
-
-                <img
-                    loading="lazy"
-                    src="{{ url_for('aspect.aspect_thumbnail', job_id=job.id) }}"
-                    class="w-full h-full object-contain cursor-pointer video-thumb"
-                    data-video-src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}"
-                >
-
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span class="text-white text-3xl">▶</span>
+                    <span>{{ job.progress }}%</span>
                 </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="mt-4">
+
+                {% if job.status == "processing" %}
+                    <p class="text-sm text-gray-600 animate-pulse">
+                        ⏳ {{ job.step }}
+                    </p>
+
+                {% elif job.status == "failed" %}
+                    <p class="text-red-500 font-medium">❌ Failed</p>
+
+                {% elif job.status == "finished" %}
+
+                    <h4 class="font-medium mb-3">📝 Auto Subtitled Video</h4>
+
+                    <!-- VIDEO PREVIEW -->
+                    <div class="relative aspect-video bg-black rounded-xl overflow-hidden">
+
+                        <img
+                            loading="lazy"
+                            src="{{ url_for('aspect.aspect_thumbnail', job_id=job.id) }}"
+                            class="w-full h-full object-contain cursor-pointer video-thumb
+                                   transition duration-300 group-hover:scale-105"
+                            data-video-src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}"
+                        >
+
+                        <!-- play overlay -->
+                        <div class="absolute inset-0 flex items-center justify-center
+                                    bg-black/20 opacity-0 group-hover:opacity-100
+                                    transition pointer-events-none">
+
+                            <div class="bg-white/90 rounded-full p-3 shadow">
+                                ▶
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ACTION -->
+                    <a
+                        href="{{ url_for('aspect.aspect_download', job_id=job.id) }}"
+                        class="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-800 transition">
+                        ⬇ Download
+                    </a>
+
+                {% else %}
+                    <small class="text-gray-400">⏳ Waiting…</small>
+                {% endif %}
 
             </div>
 
-            <a class="block mt-3 text-blue-600 hover:underline text-sm" href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
-                Download
-            </a>
-
-            {% else %}
-            <small class="">⏳ Waiting…</small>
-            {% endif %}
-
-            <button class="delete-job-btn mt-4 text-sm text-red-500" data-job-id="{{ job.id }}">
+            <!-- FOOTER -->
+            <button
+                class="delete-job-btn mt-5 text-sm text-red-500 hover:text-red-700 transition"
+                data-job-id="{{ job.id }}">
                 🗑 Delete
             </button>
 
@@ -153,8 +195,8 @@
         {% endfor %}
 
     </div>
-
 </section>
+
 
 {% endblock %}
 

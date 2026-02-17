@@ -10,14 +10,14 @@ from clipper.whisper import transcribe_audio
 from clipper.nlp import merge_segments, detect_topic_changes, enforce_min_duration
 from clipper.clipper import cut_topic_clips
 
-from helper.preview_download import get_user_jobs_with_outputs
+from helper.preview_download import get_user_clip_with_outputs, generate_thumbnail_clip
 from helper.aspect_ratio import convert_aspect
 
 from helper.daily_usage import can_start_job
 #from helper.calculate_tokens import calculate_required_tokens
 from datetime import date
 
-from flask import current_app
+from flask import current_app,json
 
 from yt_dlp import YoutubeDL
 
@@ -35,7 +35,7 @@ def auto_clipper():
     user_id = session.get("user_id")  # ✅ safe access
 
     if user_id:
-        jobs = get_user_jobs_with_outputs(user_id)
+        jobs = get_user_clip_with_outputs(user_id)
         return render_template(
             "autoClipper.html",
             form=form,
@@ -226,16 +226,31 @@ def process_video_background(app, job_id, save_path, job_dir):
                 clips=topic_clips,
                 output_dir=job_dir + "/clips"
             )
+            # ---- CREATE THUMBNAILS ----
+            for clip in final_clips:
+                clip_path = clip["file"]
+
+                thumb_path = clip_path.replace(".mp4", ".jpg")
+
+                generate_thumbnail_clip(clip_path, thumb_path)
+
+                # ✅ IMPORTANT: store filename ONLY
+                clip["file"] = os.path.basename(clip_path)
+                clip["thumbnail_name"] = os.path.basename(thumb_path)
 
             job.progress = 92
             job.step = "formatting clips"
+            job.clips_data = json.dumps(final_clips)
             db.session.commit()
 
             if aspect_ratio != "original":
                 converted_clips = []
 
+                clips_dir = os.path.join(job_dir, "clips")
+
                 for clip in final_clips:
-                    clip_path = clip["file"]
+                    # rebuild absolute path
+                    clip_path = os.path.join(clips_dir, clip["file"])
 
                     converted = clip_path.replace(".mp4", "_converted.mp4")
 
@@ -244,6 +259,7 @@ def process_video_background(app, job_id, save_path, job_dir):
                         output_path=converted,
                         ratio=aspect_ratio
                     )
+
                     os.replace(converted, clip_path)
                     converted_clips.append(clip)
 
@@ -286,6 +302,13 @@ def clipper_status(job_id):
         "job_id": job.id
     })
 
+@clipper_bp.route("/clip-thumbnail/<int:job_id>/<filename>")
+def clip_thumbnail(job_id, filename):
+    job = VideoJob.query.get_or_404(job_id)
+
+    clip_dir = os.path.join(job.job_dir, "clips")
+
+    return send_from_directory(clip_dir, filename)
 
 @clipper_bp.route("/clipper-stream/<int:job_id>/<filename>")
 def clipper_stream(job_id, filename):

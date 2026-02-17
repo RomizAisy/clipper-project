@@ -136,18 +136,12 @@ def process_aspect_background(app, job_id, input_path, ratio):
         job = VideoJob.query.get(job_id)
         if not job:
             return
-        if ratio == "original":
-            job.step = "skipped (original)"
-            job.output_file = input_path
-            job.status = "finished"
-            job.progress = 100
-            db.session.commit()
-            return
 
         try:
             # ---------- PROCESS ----------
             if ratio == "original":
                 job.step = "skipped (original)"
+                job.progress = 60
                 output_path = input_path
 
             else:
@@ -166,7 +160,7 @@ def process_aspect_background(app, job_id, input_path, ratio):
                     ratio=ratio
                 )
 
-            # OUTPUT 
+            # ---------- SAVE OUTPUT ----------
             job.output_file = output_path
             db.session.commit()
 
@@ -189,16 +183,13 @@ def process_aspect_background(app, job_id, input_path, ratio):
 
             user = User.query.get(job.user_id)
 
-            # Refund tokens
             if user and job.required_tokens:
                 user.tokens += job.required_tokens
 
             job.status = "failed, token refunded"
             job.step = str(e)
-
             db.session.commit()
 
-    
 def download_from_link(url, job_dir):
     output = os.path.join(job_dir, "input.%(ext)s")
 

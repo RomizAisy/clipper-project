@@ -4,6 +4,27 @@ from models import VideoJob
 
 import subprocess
 
+def generate_thumbnail_clip(video_path, thumbnail_path, time_pos="00:00:02"):
+    """
+    Extract thumbnail from video using ffmpeg
+    """
+
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-ss", time_pos,        # seek position
+        "-i", video_path,
+        "-vframes", "1",
+        "-q:v", "2",            # high quality jpeg
+        thumbnail_path
+    ]
+
+    subprocess.run(
+        cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
 def generate_thumbnail(video_path, job_dir):
     thumb_path = os.path.join(job_dir, "thumbnail.jpg")
     print("VIDEO:", video_path, type(video_path))
@@ -20,6 +41,32 @@ def generate_thumbnail(video_path, job_dir):
 ])
 
     return thumb_path
+
+import json
+import os
+
+def get_user_clip_with_outputs(user_id):
+    jobs = (
+        VideoJob.query
+        .filter_by(user_id=user_id)
+        .order_by(VideoJob.id.desc())
+        .all()
+    )
+
+    results = []
+
+    for job in jobs:
+        # ✅ load clips from DB
+        clips = json.loads(job.clips_data or "[]")
+
+        results.append({
+            "job": job,
+            "clips": clips,
+            "autosub": job.output_file
+        })
+
+    return results
+
 
 def get_user_jobs_with_outputs(user_id):
     jobs = VideoJob.query.filter_by(user_id=user_id).order_by(VideoJob.id.desc()).all()
