@@ -119,12 +119,21 @@
             <p class="text-red-500">❌ Failed</p>
 
             {% elif job.status == "finished" %}
-            <h4 class="mb-2">📝 Auto Subtitled Video</h4>
+            <h4 class="mb-2">📝 Aspect Ratio Convert</h4>
 
-            <div class="aspect-video bg-black rounded overflow-hidden">
-                <video controls class="w-full h-full object-contain">
-                    <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}">
-                </video>
+            <div class="aspect-video bg-black rounded overflow-hidden relative">
+
+                <img
+                    loading="lazy"
+                    src="{{ url_for('aspect.aspect_thumbnail', job_id=job.id) }}"
+                    class="w-full h-full object-contain cursor-pointer video-thumb"
+                    data-video-src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}"
+                >
+
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span class="text-white text-3xl">▶</span>
+                </div>
+
             </div>
 
             <a class="block mt-3 text-blue-600 hover:underline text-sm" href="{{ url_for('aspect.aspect_download', job_id=job.id) }}">
@@ -169,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
 {% endif %}
 
 
+
 <script>
     // FILE UPLOAD
 document.addEventListener("DOMContentLoaded", () => {
@@ -203,6 +213,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+
+
+document.addEventListener("click", function(e) {
+
+    const img = e.target.closest(".video-thumb");
+    if (!img) return;
+
+    const videoSrc = img.dataset.videoSrc;
+
+    const video = document.createElement("video");
+    video.controls = true;
+    video.preload = "none";
+    video.autoplay = true;
+    video.className = "w-full h-full object-contain";
+
+    const source = document.createElement("source");
+    source.src = videoSrc;
+
+    video.appendChild(source);
+
+    img.parentElement.replaceChild(video, img);
+});
+
+
 document.getElementById("uploadForm").addEventListener("submit", function(e) {
     e.preventDefault();
 

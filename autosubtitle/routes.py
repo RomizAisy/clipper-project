@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, session, jsonify, abort, send_from_directory, flash, request, url_for
+from flask import Blueprint, render_template, redirect, send_file, session, jsonify, abort, send_from_directory, flash, request, url_for
 from .forms import AutosubFileForm
 from werkzeug.utils import secure_filename
 
@@ -10,7 +10,7 @@ from autosubtitle.whisper import transcribe_audio
 from autosubtitle.sub_style import write_ass
 from autosubtitle.burn_sub import burn_subtitles
 
-from helper.preview_download import get_user_jobs_with_outputs
+from helper.preview_download import get_user_jobs_with_outputs, generate_thumbnail
 from helper.aspect_ratio import convert_aspect
 from helper.calculate_tokens import calculate_required_tokens
 
@@ -256,6 +256,20 @@ def process_autosubs_background(app, job_id, video_path, style):
 
             burn_subtitles(video_path, ass_path, output_path)
 
+
+            # -----------------------------
+            # GENERATE THUMBNAIL
+            # -----------------------------
+            job.step = "generating preview"
+            job.progress = 95
+            db.session.commit()
+
+            thumb = generate_thumbnail(output_path, job.job_dir)
+            job.thumbnail_file = thumb
+
+            # -----------------------------
+            # FINISH JOB
+            # -----------------------------
             job.progress = 100
             job.status = "finished"
             job.step = "done"
@@ -291,6 +305,12 @@ def autosub_status(job_id):
         "step": job.step,
         "job_id": job.id
     })
+
+@autosub_bp.route("/thumbnail/<int:job_id>")
+def autosub_thumbnail(job_id):
+    job = VideoJob.query.get_or_404(job_id)
+
+    return send_file(job.thumbnail_file, mimetype="image/jpeg")
 
 @autosub_bp.route("/autosub-stream/<int:job_id>")
 def autosub_stream(job_id):

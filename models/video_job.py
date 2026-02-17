@@ -12,6 +12,7 @@ class VideoJob(db.Model):
     job_dir = db.Column(db.String(255))
     original_filename=db.Column(db.String(255))
     output_file = db.Column(db.String)
+    thumbnail_file = db.Column(db.String(255))
     required_tokens = db.Column(db.Integer, nullable=False, default=0)
     usage_charged = db.Column(db.Boolean, default=False)
     job_type = db.Column(db.String(20))  

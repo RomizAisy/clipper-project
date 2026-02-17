@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, session, jsonify, redirect, url_fo
 
 from .forms import AspectFileForm
 
-from helper.preview_download import get_user_jobs_with_outputs
+from helper.preview_download import generate_thumbnail, get_user_jobs_with_outputs
 from helper.aspect_ratio import convert_aspect
 from helper.calculate_tokens import calculate_required_tokens
 
@@ -145,21 +145,42 @@ def process_aspect_background(app, job_id, input_path, ratio):
             return
 
         try:
-            job.step = "converting"
-            job.progress = 30
+            # ---------- PROCESS ----------
+            if ratio == "original":
+                job.step = "skipped (original)"
+                output_path = input_path
+
+            else:
+                job.step = "converting"
+                job.progress = 30
+                db.session.commit()
+
+                output_path = os.path.join(
+                    job.job_dir,
+                    "aspect_converted.mp4"
+                )
+
+                convert_aspect(
+                    input_path=input_path,
+                    output_path=output_path,
+                    ratio=ratio
+                )
+
+            # OUTPUT 
+            job.output_file = output_path
             db.session.commit()
 
-            output_path = os.path.join(job.job_dir, "aspect_converted.mp4")
+            # ---------- THUMBNAIL ----------
+            job.step = "generating preview"
+            job.progress = 90
+            db.session.commit()
 
-            convert_aspect(
-                input_path=input_path,
-                output_path=output_path,
-                ratio=ratio
-            )
+            thumb = generate_thumbnail(output_path, job.job_dir)
+            job.thumbnail_file = thumb
 
-            job.output_file = output_path
-            job.progress = 100
+            # ---------- FINISH ----------
             job.status = "finished"
+            job.progress = 100
             job.step = "done"
             db.session.commit()
 
@@ -226,6 +247,15 @@ def aspect_status(job_id):
         "step": job.step,
         "job_id": job.id
     })
+
+@aspect_bp.route("/aspect-thumbnail/<int:job_id>")
+def aspect_thumbnail(job_id):
+    job = VideoJob.query.get_or_404(job_id)
+
+    if not job.thumbnail_file:
+        abort(404)
+
+    return send_file(job.thumbnail_file)
 
 @aspect_bp.route("/aspect-stream/<int:job_id>")
 def aspect_stream(job_id):
