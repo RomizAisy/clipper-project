@@ -1,0 +1,274 @@
+<!-- JOBS -->
+<section class="mx-auto px-6 pb-24">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {% for item in jobs_aspect %}
+        {% set job = item.job %}
+
+        {% if job.job_type == "aspect" %}
+        <div class="group border rounded-2xl bg-white shadow-sm hover:shadow-md transition p-5 flex flex-col justify-between">
+
+            <!-- HEADER -->
+            <div class="space-y-2">
+                <h3 class="font-semibold text-lg">
+                    Job #{{ job.id }}
+                </h3>
+
+                <div class="text-sm text-gray-500 flex items-center gap-2">
+                    <span class="
+                        px-2 py-1 rounded-md text-xs
+                        {% if job.status == 'finished' %}
+                            bg-green-100 text-green-700
+                        {% elif job.status == 'processing' %}
+                            bg-yellow-100 text-yellow-700
+                        {% else %}
+                            bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ job.status }}
+                    </span>
+
+                    <span>{{ job.progress }}%</span>
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="mt-4">
+
+                {% if job.status == "processing" %}
+                    <p class="text-sm text-gray-600 animate-pulse">
+                        ⏳ {{ job.step }}
+                    </p>
+
+                {% elif job.status == "failed" %}
+                    <p class="text-red-500 font-medium">❌ Failed</p>
+
+                {% elif job.status == "finished" %}
+
+                    <h4 class="font-medium mb-3">📝 Auto Subtitled Video</h4>
+
+                    <!-- VIDEO PREVIEW -->
+                    <div class="relative aspect-video bg-black rounded-xl overflow-hidden">
+
+                        <img
+                            loading="lazy"
+                            src="{{ url_for('aspect.aspect_thumbnail', job_id=job.id) }}"
+                            class="w-full h-full object-contain cursor-pointer video-thumb
+                                   transition duration-300 group-hover:scale-105"
+                            data-video-src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}"
+                        >
+
+                        <!-- play overlay -->
+                        <div class="absolute inset-0 flex items-center justify-center
+                                    bg-black/20 opacity-0 group-hover:opacity-100
+                                    transition pointer-events-none">
+
+                            <div class="bg-white/90 rounded-full p-3 shadow">
+                                ▶
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ACTION -->
+                    <a
+                        href="{{ url_for('aspect.aspect_download', job_id=job.id) }}"
+                        class="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-800 transition">
+                        ⬇ Download
+                    </a>
+
+                {% else %}
+                    <small class="text-gray-400">⏳ Waiting…</small>
+                {% endif %}
+
+            </div>
+
+            <!-- FOOTER -->
+            <button
+                class="delete-job-btn mt-5 text-sm text-red-500 hover:text-red-700 transition"
+                data-job-id="{{ job.id }}">
+                🗑 Delete
+            </button>
+
+        </div>
+        {% endif %}
+        {% endfor %}
+
+    </div>
+</section>
+
+
+
+{% block scripts %}
+<script>
+
+// FILE UPLOAD
+document.addEventListener("DOMContentLoaded", () => {
+
+    const input = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+    const fileStatus = document.getElementById("fileStatus");
+    const uploadBtn = document.getElementById("uploadBtn");
+
+    input.addEventListener("change", () => {
+
+        if (input.files.length > 0) {
+            const file = input.files[0];
+
+            // show filename
+            fileName.textContent = file.name;
+
+            // simulate preparing state
+            fileStatus.textContent = "Preparing file...";
+            uploadBtn.classList.add("opacity-70");
+
+            // small delay for UX feel
+            setTimeout(() => {
+                fileStatus.textContent = "✅ File ready";
+                uploadBtn.classList.remove("opacity-70");
+            }, 400);
+
+        } else {
+            fileName.textContent = "";
+            fileStatus.textContent = "";
+        }
+    });
+
+});
+
+    
+document.getElementById("uploadForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const submitBtn = document.getElementById("submitBtn");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+
+    // ✅ disable button + show loading
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Uploading...";
+
+    progressContainer.style.display = "block";
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/add-subtitle", true);
+
+    // upload progress
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + "%";
+            progressText.innerText = `Uploading ${percent}%`;
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+
+        progressText.innerText = "Processing video...";
+        startJobPolling(data.job_id);
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit";
+            progressText.innerText = "Upload failed.";
+        }
+    };
+
+    xhr.send(formData);
+});
+
+
+
+document.addEventListener("click", function(e) {
+
+    const img = e.target.closest(".video-thumb");
+    if (!img) return;
+
+    const videoSrc = img.dataset.videoSrc;
+
+    const video = document.createElement("video");
+    video.controls = true;
+    video.preload = "none";
+    video.autoplay = true;
+    video.className = "w-full h-full object-contain";
+
+    const source = document.createElement("source");
+    source.src = videoSrc;
+
+    video.appendChild(source);
+
+    img.parentElement.replaceChild(video, img);
+});
+
+    // -------------------------------
+    // Polling function
+    // -------------------------------
+    
+function startJobPolling(jobId) {
+
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+
+    const interval = setInterval(async () => {
+
+        try {
+            const res = await fetch(`/aspect-status/${jobId}`);
+            const data = await res.json();
+
+            // update progress
+            progressBar.style.width = data.progress + "%";
+            progressText.innerText = data.step || "Processing...";
+
+            if (data.status === "finished") {
+                clearInterval(interval);
+                progressText.innerText = "✅ Finished!";
+                setTimeout(() => location.reload(), 1200);
+            }
+
+            if (data.status === "failed") {
+                clearInterval(interval);
+                progressText.innerText = "❌ Failed";
+            }
+
+        } catch (err) {
+            console.error(err);
+        }
+
+    }, 1500); // poll every 1.5s
+}
+
+
+</script>
+
+
+
+<script>
+document.addEventListener("click", async (e) => {
+    if (!e.target.classList.contains("delete-job-btn")) return;
+
+    const jobId = e.target.dataset.jobId;
+
+    if (!confirm("Are you sure you want to delete this job?")) return;
+
+    try {
+        const res = await fetch(`/clipper-delete/${jobId}`, { method: "POST" });
+
+        if (!res.ok) {
+            alert("Failed to delete job");
+            return;
+        }
+
+        e.target.closest(".bg-white").remove();
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting job");
+    }
+});
+
+
+</script>
+{% endblock %}

@@ -9,86 +9,19 @@
 
 <p class="mb-6">Tokens: {{ tokens }}</p>
 
-
 <h1 class="text-3xl font-bold my-8 text-center">Your Videos</h1>
 
 <!-- CLIPPER -->
 <div class="mb-12">
     <h2 class="text-2xl font-semibold mb-4">🎬 Clipper Jobs</h2>
-
-    <div class="grid md:grid-cols-1 lg:grid-cols-1 gap-6">
-        {% for item in jobs_clipper %}
-            {% set job = item.job %}
-            {% set clips = item.clips %}
-
-            <div class="bg-white p-6 rounded-xl shadow job-card">
-                <h3 class="font-semibold mb-2">
-                    Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%
-                </h3>
-
-                {% if job.status == 'processing' %}
-                    <p class="text-yellow-600">⏳ {{ job.step }}</p>
-
-                {% elif job.status == 'failed' %}
-                    <p class="text-red-500">❌ Failed</p>
-
-                {% elif job.status == "finished" and clips %}
-                    <h4 class="font-medium mb-2">🎬 Clips Ready</h4>
-
-                    <!-- Clips grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {% for clip in clips %}
-                            <div class="bg-black rounded-lg overflow-hidden flex flex-col">
-                                <video controls class="w-full aspect-video object-contain rounded-t-lg">
-                                    <source src="{{ url_for('clipper.clipper_stream', job_id=job.id, filename=clip) }}">
-                                </video>
-                                <a href="{{ url_for('clipper.clipper_download', job_id=job.id, filename=clip) }}"
-                                   class="block mt-2 text-left text-blue-600 hover:underline p-2 bg-gray-50 rounded-b-lg">
-                                    Download
-                                </a>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <small class="text-gray-500">⏳ Waiting…</small>
-                {% endif %}
-
-                <!-- Delete button always visible -->
-                <button class="delete-job-btn mt-4 text-sm text-red-500 hover:text-red-700"
-                        data-job-id="{{ job.id }}">
-                    🗑 Delete
-                </button>
-            </div>
-        {% endfor %}
-    </div>
+    {% include "sections/clipperJob.html" %}
 </div>
 
 
 <!-- AUTO SUBTITLE -->
 <div class="mb-12">
     <h2 class="text-2xl font-semibold mb-4">📝 Auto Subtitle Jobs</h2>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for item in jobs_autosub %}
-            {% set job = item.job %}
-            <div class="bg-white p-6 rounded-xl shadow job-card">
-                <h3 class="font-semibold mb-2">Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%</h3>
-                <p class="text-yellow-600">{{ job.step if job.status == 'processing' }}</p>
-
-                {% if job.status == "finished" %}
-                    <div class="aspect-video bg-black rounded overflow-hidden">
-                        <video controls class="w-full h-full object-contain">
-                            <source src="{{ url_for('autosub.autosub_stream', job_id=job.id) }}">
-                        </video>
-                    </div>
-                    <a href="{{ url_for('autosub.autosub_download', job_id=job.id) }}"
-                       class="block mt-2 text-blue-600 hover:underline">Download Subtitled Video</a>
-                       <button class="delete-job-btn mt-4 text-sm text-red-500" data-job-id="{{ job.id }}">
-                🗑 Delete
-            </button>
-                {% endif %}
-            </div>
-        {% endfor %}
-    </div>
+    {% include "sections/autosubJob.html" %}
 </div>
 
 
@@ -96,32 +29,9 @@
 <!-- ASPECT RATIO -->
 <div class="mb-12">
     <h2 class="text-2xl font-semibold mb-4">📐 Aspect Ratio Jobs</h2>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for item in jobs_aspect %}
-            {% set job = item.job %}
-            <div class="bg-white p-6 rounded-xl shadow job-card">
-                <h3 class="font-semibold mb-2">Job #{{ job.id }} — {{ job.status }} — {{ job.progress }}%</h3>
-                <p class="text-yellow-600">{{ job.step if job.status == 'processing' }}</p>
-
-                {% if job.status == "finished" %}
-                    <div class="aspect-video bg-black rounded overflow-hidden">
-                        <video controls class="w-full h-full object-contain">
-                            <source src="{{ url_for('aspect.aspect_stream', job_id=job.id) }}">
-                        </video>
-                    </div>
-                    <a href="{{ url_for('aspect.aspect_download', job_id=job.id) }}"
-                       class="block mt-2 text-blue-600 hover:underline">Download Video</a>
-                {% endif %}
-                <button class="delete-job-btn mt-4 text-sm text-red-500" data-job-id="{{ job.id }}">
-                        🗑 Delete
-                </button>
-                
-            </div>
-
-        {% endfor %}
-        
-    </div>
+    {% include "sections/aspectJob.html" %}
 </div>
+
 
 {% endblock %}
 

@@ -1,0 +1,121 @@
+<section class="mx-auto px-6 pb-24">
+
+    <!-- ================= JOB LIST ================= -->
+    <div class="space-y-6">
+
+        <h2 class="text-xl font-semibold">Your Clipper Videos</h2>
+
+        {% for item in jobs_clipper %}
+        {% set job = item.job %}
+        {% set clips = item.clips %}
+
+        {% if job.job_type == "clipper" %}
+
+        <div class="border rounded-xl p-5 space-y-4 bg-white shadow-sm">
+
+    <!-- HEADER -->
+            <div class="space-y-2">
+                <h3 class="font-semibold text-lg">
+                    Job #{{ job.id }}
+                </h3>
+
+                <div class="text-sm text-gray-500 flex items-center gap-2">
+                    <span class="
+                        px-2 py-1 rounded-md text-xs
+                        {% if job.status == 'finished' %}
+                            bg-green-100 text-green-700
+                        {% elif job.status == 'processing' %}
+                            bg-yellow-100 text-yellow-700
+                        {% else %}
+                            bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ job.status }}
+                    </span>
+
+                    <span>{{ job.progress }}%</span>
+                </div>
+            </div>
+
+    {% if job.status == "processing" %}
+        <p class="text-sm text-gray-600">⏳ {{ job.step }}</p>
+
+    {% elif job.status == "failed" %}
+        <p class="text-red-500 font-medium">❌ Failed</p>
+
+    {% elif job.status == "finished" and clips %}
+        <h4 class="font-semibold">🎬 Clips Ready</h4>
+
+        <!-- GRID -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+
+            {% for clip in clips %}
+            <div class="group rounded-xl overflow-hidden border bg-gray-50 hover:shadow-md transition">
+
+                <!-- THUMBNAIL -->
+                <div class="relative aspect-video bg-black overflow-hidden">
+
+                    <img
+                        src="{{ url_for('clipper.clip_thumbnail',
+                            job_id=job.id,
+                            filename=clip.thumbnail_name) }}"
+                        class="w-full h-full object-cover cursor-pointer video-thumb group-hover:scale-105 transition duration-300"
+                        data-video-src="{{ url_for('clipper.clipper_stream',
+                            job_id=job.id,
+                            filename=clip.file) }}"
+                    >
+
+                    <!-- play overlay -->
+                    <div class="absolute inset-0 flex items-center justify-center
+            bg-black/20 opacity-0 group-hover:opacity-100 transition
+            pointer-events-none">
+
+                        <div class="bg-white/90 rounded-full p-3 shadow">
+                            ▶
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- CARD FOOTER -->
+                <div class="p-3 flex items-center justify-between">
+
+                    <span class="text-xs text-gray-500">
+                        {{ clip.file }}
+                    </span>
+
+                    <a href="{{ url_for('clipper.clipper_download',
+                            job_id=job.id,
+                            filename=clip.file) }}"
+                       class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                        ⬇ Download
+                    </a>
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+        <small class="text-gray-500">⏳ Waiting…</small>
+    {% endif %}
+
+    <button
+        class="delete-job-btn text-sm text-red-500 hover:text-red-700"
+        data-job-id="{{ job.id }}"
+        data-job-type="clipper">
+        🗑 Delete
+    </button>
+
+</div>
+
+
+
+        {% endif %}
+        {% endfor %}
+
+    </div>
+
+</section>

@@ -18,7 +18,7 @@ from music import music_bp
 
 
 
-from helper.preview_download import get_user_jobs_with_outputs
+from helper.preview_download import get_user_jobs_with_outputs, get_user_clip_with_outputs
 from helper.cleanup_job import cleanup_old_jobs
 
 from dotenv import load_dotenv, find_dotenv
@@ -51,64 +51,56 @@ class CSRFOnlyForm(FlaskForm):
 
 @app.route('/')
 def home():
-    clipper_form = ClipperFileForm()
-    form = CSRFOnlyForm()  
-
+    form = CSRFOnlyForm()
     user = None
     tokens = 0
     jobs_autosub = []
-    jobs_clipper = []
     jobs_aspect = []
 
     if "user_id" in session:
         user = User.query.filter_by(username=session["username"]).first()
-        user_obj = User.query.get(session["user_id"])
+        user_obj = db.session.get(User, session["user_id"])
 
-        # Clean old jobs
         cleanup_old_jobs(days=5)
 
         if user_obj:
             tokens = user_obj.tokens
 
-            # Get jobs with outputs
-            jobs = get_user_jobs_with_outputs(session["user_id"])
+            # Only get clipper jobs as objects (with .file and .thumbnail_name)
+            jobs_clipper = get_user_clip_with_outputs(session["user_id"])
 
-            # Separate jobs by type
-            for item in jobs:
+            # Get other jobs (autosub/aspect) if needed
+            jobs_all = get_user_jobs_with_outputs(session["user_id"])
+            for item in jobs_all:
                 job = item['job']
-                clips = item.get('clips', [])
-
-                job_item = {"job": job, "clips": clips}
-
                 if job.job_type == "autosub":
-                    jobs_autosub.append(job_item)
-                elif job.job_type == "clipper":
-                    jobs_clipper.append(job_item)
+                    jobs_autosub.append(item)
                 elif job.job_type == "aspect":
-                    jobs_aspect.append(job_item)
+                    jobs_aspect.append(item)
 
         return render_template(
             "dashboard.html",
             user=user,
             tokens=tokens,
-            job=job,
+            jobs_clipper=jobs_clipper,  # ready-to-use clipper jobs
             jobs_autosub=jobs_autosub,
-            jobs_clipper=jobs_clipper,
             jobs_aspect=jobs_aspect,
-            form=form  # always pass form
+            form=form
         )
 
-    # For guests
+    # Guest view
+    clipper_form = ClipperFileForm()
     return render_template(
         "home.html",
         user=user,
         tokens=tokens,
         jobs_autosub=jobs_autosub,
-        jobs_clipper=jobs_clipper,
         jobs_aspect=jobs_aspect,
+        jobs_clipper=[],
         clipper_form=clipper_form,
-        form=form  # always pass form
+        form=form
     )
+
 
 
 
