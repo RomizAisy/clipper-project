@@ -3,7 +3,6 @@
     <!-- ================= JOB LIST ================= -->
     <div class="space-y-6">
 
-        <h2 class="text-xl font-semibold">Your Clipper Videos</h2>
 
         {% for item in jobs_clipper %}
         {% set job = item.job %}
@@ -47,7 +46,7 @@
         <h4 class="font-semibold">🎬 Clips Ready</h4>
 
         <!-- GRID -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
 
             {% for clip in clips %}
             <div class="group rounded-xl overflow-hidden border bg-gray-50 hover:shadow-md transition">
@@ -81,7 +80,7 @@
                 <div class="p-3 flex items-center justify-between">
 
                     <span class="text-xs text-gray-500">
-                        {{ clip.name }}
+                        {{ clip.file }}
                     </span>
 
                     <a href="{{ url_for('clipper.clipper_download',

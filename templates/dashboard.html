@@ -36,30 +36,5 @@
 {% endblock %}
 
 {% block scripts %}
-
-<script>
-document.addEventListener("click", async (e) => {
-    if (!e.target.classList.contains("delete-job-btn")) return;
-
-    const jobId = e.target.dataset.jobId;
-
-    if (!confirm("Are you sure you want to delete this job?")) return;
-
-    try {
-        const res = await fetch(`/clipper-delete/${jobId}`, { method: "POST" });
-
-        if (!res.ok) {
-            alert("Failed to delete job");
-            return;
-        }
-
-        e.target.closest(".bg-white").remove();
-    } catch (err) {
-        console.error(err);
-        alert("Error deleting job");
-    }
-});
-
-
-</script>
+<script src="{{ url_for('static', filename='js/deletejobs.js') }}"></script>
 {% endblock %}

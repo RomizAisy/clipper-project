@@ -81,6 +81,7 @@ def home():
         return render_template(
             "dashboard.html",
             user=user,
+            jobs = jobs_all,
             tokens=tokens,
             jobs_clipper=jobs_clipper,  # ready-to-use clipper jobs
             jobs_autosub=jobs_autosub,
