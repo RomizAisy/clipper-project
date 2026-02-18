@@ -7,7 +7,7 @@ from threading import Thread
 
 from clipper.audio import extract_audio
 from autosubtitle.whisper import transcribe_audio
-from autosubtitle.sub_style import write_ass
+from autosubtitle.sub_style import write_ass, get_attr
 from autosubtitle.burn_sub import burn_subtitles
 
 from helper.preview_download import get_user_jobs_with_outputs, generate_thumbnail
@@ -233,7 +233,18 @@ def process_autosubs_background(app, job_id, video_path, style):
 
             audio_path = extract_audio(video_path, job.job_dir)
 
-            segments = transcribe_audio(audio_path)
+            segments, info = transcribe_audio(audio_path)
+            if not segments:
+                raise Exception("No subtitle segments returned")
+
+            segments = [
+                s for s in segments
+                if get_attr(s, "start") is not None
+                and get_attr(s, "end") is not None
+            ]
+
+            if not segments:
+                raise Exception("No valid subtitle segments")
 
             job.transcript_data = json.dumps(segments)
 

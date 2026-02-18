@@ -80,6 +80,7 @@ def clipper():
 
     # Save Uploaded Video
     aspectRatio = form.aspectRatio.data
+    subtitleStyle = form.subtitleStyle.data
     converted_path = os.path.join(job_dir, "aspect_converted.mp4")
 
     if form.file.data:
@@ -109,7 +110,8 @@ def clipper():
         original_filename=os.path.basename(save_path),
         job_type="clipper",
         usage_charged=False,
-        aspect_ratio=aspectRatio
+        aspect_ratio=aspectRatio,
+        subtitle_style=subtitleStyle
     )
 
     db.session.add(job)
@@ -187,6 +189,7 @@ def process_video_background(app, job_id, save_path, job_dir):
 
         
         aspect_ratio = job.aspect_ratio or "original"
+        subtitle_style = job.subtitle_style or "default_portrait"
 
         if not job.usage_charged:
             user.used_today += 1
@@ -313,7 +316,7 @@ def process_video_background(app, job_id, save_path, job_dir):
                     clip_end=clip["end"],
                     segments=segments,
                     job_dir=clip_temp_dir,
-                    style="default"
+                    style=subtitle_style
                 )
 
                 # ✅ replace original clip with subtitled version

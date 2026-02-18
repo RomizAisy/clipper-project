@@ -1,6 +1,6 @@
 from clipper.audio import extract_audio
 from autosubtitle.whisper import transcribe_audio
-from autosubtitle.sub_style import write_ass
+from autosubtitle.sub_style import get_attr, write_ass
 from autosubtitle.burn_sub import burn_subtitles
 
 import os
@@ -59,15 +59,39 @@ def slice_segments_for_clip(segments, clip_start, clip_end):
     clipped = []
 
     for seg in segments:
-        if seg["end"] < clip_start:
+        seg_start = get_attr(seg, "start")
+        seg_end   = get_attr(seg, "end")
+
+        if seg_end < clip_start:
             continue
-        if seg["start"] > clip_end:
+        if seg_start > clip_end:
             break
 
+        # ---- slice words safely ----
+        new_words = []
+        words = get_attr(seg, "words", [])
+
+        for w in words:
+            w_start = get_attr(w, "start")
+            w_end   = get_attr(w, "end")
+
+            if w_end < clip_start:
+                continue
+            if w_start > clip_end:
+                break
+
+            new_words.append({
+                "start": w_start - clip_start,
+                "end": w_end - clip_start,
+                "word": get_attr(w, "word")
+            })
+
         clipped.append({
-            "start": max(seg["start"], clip_start) - clip_start,
-            "end": min(seg["end"], clip_end) - clip_start,
-            "text": seg["text"]
+            "start": max(seg_start, clip_start) - clip_start,
+            "end": min(seg_end, clip_end) - clip_start,
+            "text": get_attr(seg, "text", ""),
+            "words": new_words
         })
 
     return clipped
+

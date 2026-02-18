@@ -10,6 +10,14 @@ class ClipperFileForm(FlaskForm):
         validators=[Optional(), URL()],
         render_kw={"placeholder": "Paste YouTube / TikTok link"}
     )
+    subtitleStyle = SelectField(u'Subtitle Style', 
+                                choices=[('default_movie', 'Default Movie'),
+                                         ('default_portrait', 'Default Portrait'),
+                                         ('pop', 'Pop'),
+                                         ('tiktok', 'Tiktok'),
+                                         ('boxed','Boxed')], 
+                                         default= 'default_portrait'
+    )
     aspectRatio = SelectField(u'Aspect Ratio', 
                                 choices=[('portrait', 'Portrait'),
                                          ('landscape', 'Landscape'),
