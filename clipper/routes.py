@@ -14,6 +14,7 @@ from helper.preview_download import get_user_clip_with_outputs, generate_thumbna
 from helper.aspect_ratio import convert_aspect
 
 from helper.daily_usage import can_start_job
+from helper.autosub import add_auto_subtitle_fast
 #from helper.calculate_tokens import calculate_required_tokens
 from datetime import date
 
@@ -204,7 +205,11 @@ def process_video_background(app, job_id, save_path, job_dir):
             ).start()
 
             segments = transcribe_audio(audio_path)
+
+            job.transcript_data = json.dumps(segments)
+
             job.step = "transcribed"
+            job.progress = 50
             db.session.commit()
 
             merged = merge_segments(segments, max_gap=0.6)
@@ -226,21 +231,21 @@ def process_video_background(app, job_id, save_path, job_dir):
                 clips=topic_clips,
                 output_dir=job_dir + "/clips"
             )
-            # ---- CREATE THUMBNAILS ----
+
+            normalized_clips = []
+
+            
             for clip in final_clips:
-                clip_path = clip["file"]
+                abs_path = clip["file"]
 
-                thumb_path = clip_path.replace(".mp4", ".jpg")
+                clip["file"] = os.path.basename(abs_path)
 
-                generate_thumbnail_clip(clip_path, thumb_path)
+                normalized_clips.append(clip)
 
-                # ✅ IMPORTANT: store filename ONLY
-                clip["file"] = os.path.basename(clip_path)
-                clip["thumbnail_name"] = os.path.basename(thumb_path)
+            final_clips = normalized_clips
 
             job.progress = 92
             job.step = "formatting clips"
-            job.clips_data = json.dumps(final_clips)
             db.session.commit()
 
             if aspect_ratio != "original":
@@ -265,8 +270,74 @@ def process_video_background(app, job_id, save_path, job_dir):
 
                 final_clips = converted_clips
 
+            # ---------- AUTO SUBTITLE (FINAL STEP) ----------
+            job.progress = 95
+            job.step = "adding subtitles"
+            db.session.commit()
+
+            clips_dir = os.path.join(job_dir, "clips")
+
+            if not job.transcript_data:
+                print("Transcript exists:", bool(job.transcript_data))
+                raise Exception("Transcript not available for this job")
+
+            if job.transcript_data:
+                segments = json.loads(job.transcript_data)
+            else:
+                # fallback (old jobs)
+                audio_path = extract_audio(save_path, job_dir)
+                segments = transcribe_audio(audio_path)
+
+                job.transcript_data = json.dumps(segments)
+                db.session.commit()
+
+            for clip in final_clips:
+
+                # always rebuild absolute path safely
+                filename = os.path.basename(clip["file"])
+                clip_path = os.path.join(clips_dir, filename)
+
+                # unique temp workspace per clip
+                safe_name = os.path.splitext(filename)[0]
+
+                clip_temp_dir = os.path.join(
+                    job_dir,
+                    f"subs_{safe_name}"
+                )
+                os.makedirs(clip_temp_dir, exist_ok=True)
+
+                # create subtitled video
+                subtitled_path = add_auto_subtitle_fast(
+                    video_path=clip_path,
+                    clip_start=clip["start"],
+                    clip_end=clip["end"],
+                    segments=segments,
+                    job_dir=clip_temp_dir,
+                    style="default"
+                )
+
+                # ✅ replace original clip with subtitled version
+                os.replace(subtitled_path, clip_path)
+
+                # ✅ ensure DB keeps filename only
+                clip["file"] = filename
+
+
+            job.step = "creating thumbnails"
+            db.session.commit()
+
+            for clip in final_clips:
+                clip_path = os.path.join(clips_dir, clip["file"])
+
+                thumb_path = clip_path.replace(".mp4", ".jpg")
+
+                generate_thumbnail_clip(clip_path, thumb_path)
+
+                clip["thumbnail_name"] = os.path.basename(thumb_path)
+
             job.progress = 100
             job.step = "done"
+            job.clips_data = json.dumps(final_clips)
             job.status = "finished"
             db.session.commit()
 

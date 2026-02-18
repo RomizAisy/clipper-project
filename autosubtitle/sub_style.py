@@ -255,6 +255,10 @@ def boxed_style(segment, max_words=3):
 
     return frames
 
+def get_attr(obj, key, default=None):
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
 
 def write_ass(segments, ass_path, style_name="default_portrait"):
     style = SUBTITLE_STYLES.get(style_name, SUBTITLE_STYLES["default_portrait"])
@@ -273,7 +277,18 @@ def write_ass(segments, ass_path, style_name="default_portrait"):
         f.write("Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text\n")
 
         for s in segments:
-            if not s.words:
+            words = get_attr(s, "words")
+
+            # If no word timestamps → fallback to normal subtitles
+            if not words:
+                start = format_ass_time(get_attr(s, "start"))
+                end   = format_ass_time(get_attr(s, "end"))
+                text  = get_attr(s, "text", "")
+
+                if text:
+                    f.write(
+                        f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{text}\n"
+                    )
                 continue
 
             # TikTok = karaoke
@@ -327,9 +342,9 @@ def write_ass(segments, ass_path, style_name="default_portrait"):
 
             # Default styles = plain subtitles
             else:
-                start = format_ass_time(s.start)
-                end   = format_ass_time(s.end)
-                text  = s.text
+                start = format_ass_time(get_attr(s, "start"))
+                end   = format_ass_time(get_attr(s, "end"))
+                text  = get_attr(s, "text", "")
 
                 f.write(
                     f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{text}\n"

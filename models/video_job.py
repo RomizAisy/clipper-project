@@ -17,6 +17,7 @@ class VideoJob(db.Model):
     usage_charged = db.Column(db.Boolean, default=False)
     aspect_ratio = db.Column(db.String(20), default="original")
     clips_data = db.Column(db.Text, nullable=True)
+    transcript_data = db.Column(db.Text, nullable=True)
     created_at = db.Column(
         db.DateTime,
         default=db.func.now()

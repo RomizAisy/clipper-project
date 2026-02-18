@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, send_file, session, jsonify, abort, send_from_directory, flash, request, url_for
+from flask import Blueprint, json, render_template, redirect, send_file, session, jsonify, abort, send_from_directory, flash, request, url_for
 from .forms import AutosubFileForm
 from werkzeug.utils import secure_filename
 
@@ -13,6 +13,7 @@ from autosubtitle.burn_sub import burn_subtitles
 from helper.preview_download import get_user_jobs_with_outputs, generate_thumbnail
 from helper.aspect_ratio import convert_aspect
 from helper.calculate_tokens import calculate_required_tokens
+
 
 from yt_dlp import YoutubeDL
 
@@ -232,11 +233,14 @@ def process_autosubs_background(app, job_id, video_path, style):
 
             audio_path = extract_audio(video_path, job.job_dir)
 
-            job.step = "transcribing"
-            job.progress = 30
+            segments = transcribe_audio(audio_path)
+
+            job.transcript_data = json.dumps(segments)
+
+            job.step = "transcribed"
+            job.progress = 50
             db.session.commit()
 
-            segments, info = transcribe_audio(audio_path)
 
             job.step = "generating subtitles"
             job.progress = 55

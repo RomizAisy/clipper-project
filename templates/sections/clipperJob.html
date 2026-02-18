@@ -59,7 +59,7 @@
                         src="{{ url_for('clipper.clip_thumbnail',
                             job_id=job.id,
                             filename=clip.thumbnail_name) }}"
-                        class="w-full h-full object-cover cursor-pointer video-thumb group-hover:scale-105 transition duration-300"
+                        class="w-full h-full object-contain cursor-pointer video-thumb group-hover:scale-105 transition duration-300"
                         data-video-src="{{ url_for('clipper.clipper_stream',
                             job_id=job.id,
                             filename=clip.file) }}"
@@ -81,7 +81,7 @@
                 <div class="p-3 flex items-center justify-between">
 
                     <span class="text-xs text-gray-500">
-                        {{ clip.file }}
+                        {{ clip.name }}
                     </span>
 
                     <a href="{{ url_for('clipper.clipper_download',
