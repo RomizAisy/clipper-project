@@ -2,7 +2,24 @@ from .plans import PLANS
 from datetime import date
 from models import VideoJob
 
+def get_daily_limit_left(user):
+    today = date.today()
 
+    if user.last_reset != today:
+        user.used_today = 0
+        user.last_reset = today
+
+    if user.daily_limit == -1:
+        return -1
+
+    running = VideoJob.query.filter(
+        VideoJob.user_id == user.id,
+        VideoJob.status == "processing"
+    ).count()
+
+    remaining = user.daily_limit - (user.used_today + running)
+
+    return max(0, remaining)
 
 def can_start_job(user):
     today = date.today()

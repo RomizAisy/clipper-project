@@ -20,6 +20,7 @@ from music import music_bp
 
 from helper.preview_download import get_user_jobs_with_outputs, get_user_clip_with_outputs
 from helper.cleanup_job import cleanup_old_jobs
+from helper.daily_usage import get_daily_limit_left
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -65,6 +66,8 @@ def home():
 
         if user_obj:
             tokens = user_obj.tokens
+            daily_left = get_daily_limit_left(user)
+            db.session.commit()
 
             # Only get clipper jobs as objects (with .file and .thumbnail_name)
             jobs_clipper = get_user_clip_with_outputs(session["user_id"])
@@ -86,6 +89,7 @@ def home():
             jobs_clipper=jobs_clipper,  # ready-to-use clipper jobs
             jobs_autosub=jobs_autosub,
             jobs_aspect=jobs_aspect,
+            daily_left=daily_left,
             form=form
         )
 

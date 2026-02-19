@@ -1,4 +1,6 @@
 from flask import Blueprint, json, render_template, redirect, send_file, session, jsonify, abort, send_from_directory, flash, request, url_for
+
+from helper.daily_usage import can_start_job
 from .forms import AutosubFileForm
 from werkzeug.utils import secure_filename
 
@@ -51,6 +53,8 @@ def autosub_page():
 @autosub_bp.route("/add-subtitle", methods = ["POST"])
 def add_subtitle():
     form = AutosubFileForm()
+    user = User.query.get(session["user_id"])
+
     if "user_id" not in session:
         return redirect(url_for("auth.register"))
 
@@ -59,6 +63,9 @@ def add_subtitle():
     
     if not form.file.data and not form.video_url.data:
         return jsonify({"error": "Upload a file or paste a video link"}), 400
+    
+    if not can_start_job(user):
+        return jsonify({"error": "Daily limit reached"}), 403
 
     # Temp Directory
     BASE_TEMP_DIR = os.path.join(os.getcwd(), "uploads", "temp")
@@ -109,29 +116,7 @@ def add_subtitle():
         return jsonify({"error": "No video provided"}), 400
 
     # Get user
-    user = User.query.get(session["user_id"])
-
-    # Calculate required tokens
-    try:
-        required_tokens = calculate_required_tokens(save_path)
-    except Exception as e:
-        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
-
-    # Check token balance
-    if user.tokens < required_tokens:
-        return jsonify({
-            "error": "Not enough tokens",
-            "required": required_tokens,
-            "available": user.tokens
-        }), 403
-
-    # Deduct tokens
-    try:
-        user.tokens -= required_tokens
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return jsonify({"error": "Token deduction failed"}), 500
+   
 
     # Now create VideoJob
     job = VideoJob(
@@ -142,7 +127,7 @@ def add_subtitle():
         job_dir=job_dir,
         original_filename=os.path.basename(save_path),
         job_type="autosub",
-        required_tokens=required_tokens
+        usage_charged=False,
     )
 
     db.session.add(job)
@@ -215,8 +200,11 @@ def fake_progress(app, job_id, start, end, duration=60):
 def process_autosubs_background(app, job_id, video_path, style):
     with app.app_context():
         job = VideoJob.query.get(job_id)
-        if not job:
-            return
+        user = User.query.get(job.user_id)
+        if not job.usage_charged:
+            user.used_today += 1
+            job.usage_charged = True
+            db.session.commit()
 
         try:
             job.status = "processing"
@@ -291,17 +279,16 @@ def process_autosubs_background(app, job_id, video_path, style):
             db.session.commit()
 
         except Exception as e:
+
             traceback.print_exc()
 
             user = User.query.get(job.user_id)
-
+            job.status = "failed"
             # Refund tokens
-            if user and job.required_tokens:
-                user.tokens += job.required_tokens
-
-            job.status = "failed, token refunded"
-            job.step = str(e)
-
+            if job.usage_charged:
+                user.used_today = max(0, user.used_today - 1)
+                job.usage_charged = False
+        finally:
             db.session.commit()
 
 @autosub_bp.route("/autosub-status/<int:job_id>")

@@ -80,27 +80,6 @@ def aspect_ratio():
     # Get user
     user = User.query.get(session["user_id"])
 
-    # Calculate required tokens
-    try:
-        required_tokens = calculate_required_tokens(save_path)
-    except Exception as e:
-        return jsonify({"error": f"Could not read video duration: {str(e)}"}), 400
-
-    # Check token balance
-    if user.tokens < required_tokens:
-        return jsonify({
-            "error": "Not enough tokens",
-            "required": required_tokens,
-            "available": user.tokens
-        }), 403
-
-    # Deduct tokens
-    try:
-        user.tokens -= required_tokens
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return jsonify({"error": "Token deduction failed"}), 500
 
     # Now create VideoJob
     job = VideoJob(
@@ -111,7 +90,6 @@ def aspect_ratio():
         job_dir=job_dir,
         original_filename=os.path.basename(save_path),
         job_type="aspect",
-        required_tokens=required_tokens
     )
 
     db.session.add(job)
@@ -181,12 +159,7 @@ def process_aspect_background(app, job_id, input_path, ratio):
         except Exception as e:
             traceback.print_exc()
 
-            user = User.query.get(job.user_id)
-
-            if user and job.required_tokens:
-                user.tokens += job.required_tokens
-
-            job.status = "failed, token refunded"
+            job.status = "failed"
             job.step = str(e)
             db.session.commit()
 

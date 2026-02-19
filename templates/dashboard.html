@@ -7,7 +7,12 @@
 <h1 class="text-3xl font-bold mb-2">Dashboard</h1>
 <h1 class="text-2xl font-bold mb-2">Welcome {{ user }}</h1>
 
-<p class="mb-6">Tokens: {{ tokens }}</p>
+{% if daily_left == -1 %}
+    <p>Daily limit: Unlimited</p>
+{% else %}
+    <p>Daily limit left: {{ daily_left }} / {{ user.daily_limit }}</p>
+{% endif %}
+<p>Your Plan: {{ user.plan }} 👑</p>
 
 <h1 class="text-3xl font-bold my-8 text-center">Your Videos</h1>
 

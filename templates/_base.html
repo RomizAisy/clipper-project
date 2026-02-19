@@ -20,7 +20,7 @@
 <nav class="sticky top-0 z-50 bg-gray-900 text-white">
 
   <!-- NAV ROW -->
-  <div class="lg:grid lg:grid-cols-[auto_1fr_auto] lg:items-center px-6 py-4 flex justify-between">
+  <div class="relative items-center w-[90%] m-auto py-4 flex justify-between">
 
     <!-- LOGO -->
     <div class="">
@@ -30,7 +30,7 @@
     </div>
 
     <!-- CENTER MENU (desktop) -->
-    <div class="hidden lg:flex justify-center space-x-6">
+    <div class="hidden lg:flex justify-center gap-4 absolute left-1/2 -translate-x-1/2">
       <a href="/auto-clipper" class="hover:text-gray-300">Auto Clipper</a>
       <a href="/auto-subtitle" class="hover:text-gray-300">Auto Subtitle</a>
       <a href="/aspect-ratio" class="hover:text-gray-300">Aspect Ratio</a>
@@ -38,7 +38,7 @@
     </div>
 
     <!-- RIGHT SIDE -->
-    <div class="flex justify-end items-center gap-4">
+    <div class="flex justify-end items-center">
       <!-- Desktop buttons -->
       <div class="lg:flex hidden gap-4">
         {% if session.get("user_id") %}
