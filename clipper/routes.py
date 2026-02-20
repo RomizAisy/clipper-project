@@ -182,7 +182,6 @@ def fake_progress(app, job_id, start, end, duration=60):
     
 
 def process_video_background(app, job_id, save_path, job_dir):
-    
     with app.app_context():
         job = VideoJob.query.get(job_id)
         user = User.query.get(job.user_id)

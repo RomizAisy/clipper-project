@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, current_app
+from flask import current_app
 
 import os, tempfile, time, traceback
 from werkzeug.utils import secure_filename
@@ -110,6 +111,7 @@ def aspect_ratio():
     return jsonify({"job_id": job_id})
 
 def process_aspect_background(app, job_id, input_path, ratio):
+
     with app.app_context():
         job = VideoJob.query.get(job_id)
         if not job:
