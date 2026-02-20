@@ -17,24 +17,24 @@
 <body class="bg-gray-50 min-h-screen flex flex-col antialiased">
 
 <!-- Navbar -->
-<nav class="sticky top-0 z-50 bg-gray-900 text-white">
+<nav class="sticky top-0 z-50 bg-gray-50 text-black border-b-2 border-gray-200">
 
   <!-- NAV ROW -->
   <div class="relative items-center w-[90%] m-auto py-4 flex justify-between">
 
     <!-- LOGO -->
     <div class="">
-      <a href="/" class="text-lg font-semibold hover:text-gray-300">
+      <a href="/" class="text-lg font-semibold hover:text-gray-300  transition-text duration-300">
         🎬 Clippera
       </a>
     </div>
 
     <!-- CENTER MENU (desktop) -->
-    <div class="hidden lg:flex justify-center gap-4 absolute left-1/2 -translate-x-1/2">
-      <a href="/auto-clipper" class="hover:text-gray-300">Auto Clipper</a>
-      <a href="/auto-subtitle" class="hover:text-gray-300">Auto Subtitle</a>
-      <a href="/aspect-ratio" class="hover:text-gray-300">Aspect Ratio</a>
-      <a href="/price" class="hover:text-gray-300">Pricing</a>
+    <div class="hidden lg:flex justify-center gap-4 absolute left-1/2 -translate-x-1/2 ">
+      <a href="/auto-clipper" class="hover:text-gray-300 transition-text duration-300">Auto Clipper</a>
+      <a href="/auto-subtitle" class="hover:text-gray-300 transition-text duration-300">Auto Subtitle</a>
+      <a href="/aspect-ratio" class="hover:text-gray-300 transition-text duration-300">Aspect Ratio</a>
+      <a href="/price" class="hover:text-gray-300 transition-text duration-300">Pricing</a>
     </div>
 
     <!-- RIGHT SIDE -->
@@ -47,12 +47,15 @@
             Logout
           </a>
         {% else %}
-          <a href="/login" class="text-center bg-black text-white px-4 py-2 text-sm rounded-md font-medium">
+          <a href="/login" class="text-center bg-white text-black hover:bg-black hover:text-white px-4 py-2 text-sm rounded-md font-medium transition duration-300 ease-in-out">
             Login
           </a>
           <a href="/register"
-             class="block text-center bg-white text-black hover:bg-black hover:text-white px-4 py-2 text-sm rounded-md  font-medium">
-            Signup for Free Token
+             class="block text-center bg-black text-white 
+          hover:bg-white hover:text-black
+          px-4 py-2 text-sm rounded-md font-medium
+          transition duration-300 ease-in-out">
+            Signup for Free Trial
           </a>
         {% endif %}
         
