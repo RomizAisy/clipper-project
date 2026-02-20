@@ -6,6 +6,8 @@ model = WhisperModel(
     compute_type="int8"
 )
 
+
+
 def transcribe_audio(audio_path):
     segments, info = model.transcribe(
     audio_path,
@@ -13,3 +15,4 @@ def transcribe_audio(audio_path):
     vad_filter=True
 )
     return list(segments), info
+    

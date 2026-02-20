@@ -5,10 +5,8 @@ from extensions import db
 from models import User
 from clipper.forms import ClipperFileForm
 
-from helper.preview_download import (
-    get_user_jobs_with_outputs,
-    get_user_clip_with_outputs,
-)
+from helper.preview_download import get_user_jobs_with_outputs, get_user_clip_with_outputs
+
 from helper.cleanup_job import cleanup_old_jobs
 from helper.daily_usage import get_daily_limit_left
 

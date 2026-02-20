@@ -1,14 +1,14 @@
 from faster_whisper import WhisperModel
 
-
-# Load once (IMPORTANT)
+# Load once (GOOD — keep this)
 model = WhisperModel(
-    "small",          # tiny / base / small / medium
-    device="cpu",     # or "cuda"
+    "small",
+    device="cpu",
     compute_type="int8"
 )
 
 def transcribe_audio(audio_path):
+    print("✅ NEW TRANSCRIBE FUNCTION LOADED")
     segments, info = model.transcribe(
         audio_path,
         beam_size=5,
@@ -16,12 +16,21 @@ def transcribe_audio(audio_path):
     )
 
     results = []
+
     for seg in segments:
         results.append({
-            "start": seg.start,
-            "end": seg.end,
+            "start": float(seg.start),
+            "end": float(seg.end),
             "text": seg.text.strip(),
-            "words": seg.words
+            "words": [
+                {
+                    "word": w.word,
+                    "start": float(w.start),
+                    "end": float(w.end),
+                    "probability": float(w.probability)
+                }
+                for w in (seg.words or [])
+            ]
         })
 
     return results
