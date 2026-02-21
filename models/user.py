@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 from datetime import datetime
-
+from helper.plans import PLANS
 
 
 #DATABASE USER MODEL
@@ -17,10 +17,12 @@ class User(db.Model):
     used_today = db.Column(db.Integer, default=0)
     last_reset = db.Column(db.Date, default=lambda: datetime.utcnow().date())
 
+    free_limit = 3
+
     # daily quota limit (copied from PLANS at purchase)
     daily_limit = db.Column(
         db.Integer,
-        default=2   # free plan limit
+        default=3   # free plan limit
     )
 
     def check_password(self, password):
@@ -29,10 +31,20 @@ class User(db.Model):
     def __repr__(self):
         return f'{self.username}'
 
-    def is_unlimited(self):
-        return self.daily_limit == -1
+    def reset_if_needed(self):
+        """Reset used_today only for non-free users."""
+        plan_info = PLANS.get(self.plan, {})
+        if not plan_info.get("is_free") and self.last_reset != datetime.utcnow().date():
+            self.used_today = 0
+            self.last_reset = datetime.utcnow().date()
+            db.session.commit()
 
     def remaining_quota(self):
-        if self.daily_limit == -1:
-            return float("inf")
-        return max(0, self.daily_limit - self.used_today)
+        plan_info = PLANS.get(self.plan, {})
+        if plan_info.get("is_free"):
+            # Free users never reset daily
+            return max(0, plan_info["daily_limit"] - self.used_today)
+        else:
+            # Paid users: daily limit applies
+            self.reset_if_needed()
+            return max(0, plan_info["daily_limit"] - self.used_today)

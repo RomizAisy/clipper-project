@@ -12,7 +12,13 @@
 {% else %}
     <p>Daily limit left: {{ daily_left }} / {{ user.daily_limit }}</p>
 {% endif %}
-<p>Your Plan: {{ user.plan }} 👑</p>
+<p>Your Plan: {{ user.plan }} 
+    {% if user.plan != "free" %}
+    <span>👑</span>
+{% endif %}
+</p>
+
+
 
 <h1 class="text-3xl font-bold my-8 text-center">Your Videos</h1>
 
