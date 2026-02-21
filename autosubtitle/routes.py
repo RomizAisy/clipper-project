@@ -8,22 +8,17 @@ from werkzeug.utils import secure_filename
 import os, tempfile, time, traceback, shutil
 from threading import Thread
 
-from clipper.audio import extract_audio
-from autosubtitle.whisper import transcribe_audio
-from autosubtitle.sub_style import write_ass, get_attr
-from autosubtitle.burn_sub import burn_subtitles
+from autosubtitle.tasks.autosub_tasks import process_autosubs_background 
 
 from helper.preview_download import get_user_jobs_with_outputs, generate_thumbnail
 from helper.aspect_ratio import convert_aspect
-from helper.calculate_tokens import calculate_required_tokens
-
 
 from yt_dlp import YoutubeDL
 
 from extensions import db
 from models import VideoJob, User
 
-from flask import current_app
+from extensions import clipper_queue
 
 autosub_bp = Blueprint("autosub", __name__)
 
@@ -138,12 +133,12 @@ def add_subtitle():
     job_id = job.id
 
     # Start background processing
-    app = current_app._get_current_object()
-    Thread(
-        target=process_autosubs_background,
-        args=(app, job_id, save_path, style),
-        daemon=True
-    ).start()
+    clipper_queue.enqueue(
+    process_autosubs_background,
+    job_id,
+    save_path,
+    style
+)
     return jsonify({"job_id": job_id})
 
 
@@ -176,121 +171,6 @@ def download_from_link(url, job_dir):
 
     return os.path.join(job_dir, f"input.{ext}")
 
-
-def fake_progress(app, job_id, start, end, duration=60):
-    with app.app_context():
-        steps = 10
-        step_time = duration / steps
-        inc = (end - start) / steps
-
-        for i in range(steps):
-            job = VideoJob.query.get(job_id)
-            if not job or job.status != "processing":
-                break
-
-            new_progress = int(start + inc * (i + 1))
-
-            # don't overwrite real progress
-            if new_progress > job.progress:
-                job.progress = new_progress
-                job.step = "transcribing"
-                db.session.commit()
-
-            time.sleep(step_time)
-
-def process_autosubs_background(app, job_id, video_path, style):
-    with app.app_context():
-        job = VideoJob.query.get(job_id)
-        user = User.query.get(job.user_id)
-        if not job.usage_charged:
-            user.used_today += 1
-            job.usage_charged = True
-            db.session.commit()
-
-        try:
-            job.status = "processing"
-            job.step = "extracting audio"
-            job.progress = 10
-            db.session.commit()
-
-            audio_path = os.path.join(job.job_dir, "audio.wav")
-            ass_path   = os.path.join(job.job_dir, "subs.ass")
-            output_path = os.path.join(
-                job.job_dir,
-                f"subtitled_{os.path.basename(video_path)}"
-            )
-
-            audio_path = extract_audio(video_path, job.job_dir)
-
-            segments, info = transcribe_audio(audio_path)
-            if not segments:
-                raise Exception("No subtitle segments returned")
-
-            segments = [
-                s for s in segments
-                if get_attr(s, "start") is not None
-                and get_attr(s, "end") is not None
-            ]
-
-            if not segments:
-                raise Exception("No valid subtitle segments")
-
-            job.transcript_data = json.dumps(segments)
-
-            job.step = "transcribed"
-            job.progress = 50
-            db.session.commit()
-
-
-            job.step = "generating subtitles"
-            job.progress = 55
-            db.session.commit()
-
-            write_ass(segments, ass_path, style)
-
-            job.step = "burning subtitles"
-            job.progress = 80
-            db.session.commit()
-
-            output_dir = os.path.join(job.job_dir, "output")
-            os.makedirs(output_dir, exist_ok=True)
-
-            output_path = os.path.join(output_dir, "subtitled.mp4")
-            job.output_file = output_path
-
-            burn_subtitles(video_path, ass_path, output_path)
-
-
-            # -----------------------------
-            # GENERATE THUMBNAIL
-            # -----------------------------
-            job.step = "generating preview"
-            job.progress = 95
-            db.session.commit()
-
-            thumb = generate_thumbnail(output_path, job.job_dir)
-            job.thumbnail_file = thumb
-
-            # -----------------------------
-            # FINISH JOB
-            # -----------------------------
-            job.progress = 100
-            job.status = "finished"
-            job.step = "done"
-            db.session.commit()
-
-        except Exception as e:
-
-            traceback.print_exc()
-
-            user = User.query.get(job.user_id)
-            job.status = "failed"
-            # Refund tokens
-            if job.usage_charged:
-                user.used_today = max(0, user.used_today - 1)
-                job.usage_charged = False
-        finally:
-            db.session.commit()
 
 @autosub_bp.route("/autosub-status/<int:job_id>")
 def autosub_status(job_id):

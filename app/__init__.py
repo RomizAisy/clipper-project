@@ -14,10 +14,7 @@ from autosubtitle import autosub_bp
 from aspectratio import aspect_bp
 from music import music_bp
 
-
-
 load_dotenv(find_dotenv())
-
 
 def create_app():
     app = Flask(__name__,
@@ -25,6 +22,7 @@ def create_app():
                  static_folder="../static"
                 )
     app.config.from_object(Config)
+    
 
     app.secret_key = app.config["SECRET_KEY"]
     app.permanent_session_lifetime = app.config["PERMANENT_SESSION_LIFETIME"]
