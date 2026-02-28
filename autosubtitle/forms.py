@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import FileField, SubmitField, SelectField, URLField
+from wtforms import FileField, SubmitField, SelectField, URLField, RadioField
 from wtforms.validators import InputRequired, URL, Optional
 
 
 class AutosubFileForm(FlaskForm):
-    subtitleStyle = SelectField(u'Subtitle Style', 
+    subtitleStyle = RadioField(u'Subtitle Style', 
                                 choices=[('default_movie', 'Default Movie'),
                                          ('default_portrait', 'Default Portrait'),
                                          ('pop', 'Pop'),
