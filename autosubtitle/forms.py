@@ -24,4 +24,4 @@ class AutosubFileForm(FlaskForm):
         validators=[Optional(), URL()],
         render_kw={"placeholder": "Paste YouTube / TikTok link"}
     )
-    submit = SubmitField("Upload File Auto Subtitle")
+    submit = SubmitField("Process")
