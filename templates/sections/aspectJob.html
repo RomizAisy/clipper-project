@@ -37,15 +37,15 @@
 
                 {% if job.status == "processing" %}
                     <p class="text-sm text-gray-600 animate-pulse">
-                        ⏳ {{ job.step }}
+                        {{ job.step }}
                     </p>
 
                 {% elif job.status == "failed" %}
-                    <p class="text-red-500 font-medium">❌ Failed</p>
+                    <p class="text-red-500 font-medium">Failed</p>
 
                 {% elif job.status == "finished" %}
 
-                    <h4 class="font-medium mb-3">📝 Auto Subtitled Video</h4>
+                    <h4 class="font-medium mb-3">Aspect Ratio Video</h4>
 
                     <!-- VIDEO PREVIEW -->
                     <div class="relative aspect-video bg-black rounded-xl overflow-hidden">
