@@ -82,17 +82,33 @@
         {% if form.subtitleStyle.data == option.data %}checked{% endif %}
     >
 
+
     <!-- IMAGE CARD -->
     <div
-        class="relative h-28 rounded-lg border-2 border-gray-300
+        class="group relative h-28 rounded-lg border-2 border-gray-300
                bg-cover bg-center
                transition-all duration-200
                hover:scale-105
                peer-checked:border-black
                peer-checked:ring-4
-               peer-checked:ring-black/20"
-        style="background-image:url('');">
+               peer-checked:ring-black/20">
+        
+<!-- IMAGE (default preview) -->
+    <img
+        src="{{ url_for('static', filename='videos/' ~ option.data ~ '.jpg') }}"
+        class="absolute inset-0 w-full h-full object-cover"
+    >
 
+    <!-- VIDEO (on hover) -->
+    <video
+        autoplay
+        muted
+        loop
+        playsinline
+        class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition">
+        
+        <source src="{{ url_for('static', filename='videos/' ~ option.data ~ '.mp4') }}">
+    </video>
         <!-- CHECK ICON -->
         <div class="absolute top-2 right-2 hidden
                     peer-checked:flex

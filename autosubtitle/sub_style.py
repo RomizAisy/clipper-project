@@ -299,6 +299,7 @@ def boxed_style(segment, max_words=3):
                 word.strip("{}")
                     .replace(".", "")
                     .replace(",", "")
+                    .replace("-", "")
             )
 
             anim = (
