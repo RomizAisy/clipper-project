@@ -123,59 +123,154 @@
   </div>
 </section>
 
+<section class="py-20">
+  <div class="max-w-6xl mx-auto px-6 text-center">
 
-    <!-- FORM CARD -->
-    <div class="shadow-xl rounded-4xl p-6 md:p-8 max-w-3xl mx-auto">
+    <h2 class="text-3xl font-bold mb-12">Cara Kerja</h2>
 
-        <form id="uploadForm"
-              action="/clipper-video"
-              method="POST"
-              enctype="multipart/form-data"
-              class="space-y-6">
+    <div class="grid md:grid-cols-3 gap-10">
 
-            {{ clipper_form.hidden_tag() }}
+      <div>
+        <div class="text-4xl mb-4">📤</div>
+        <h3 class="font-semibold text-lg">Upload Video</h3>
+        <p class="text-gray-500">Upload atau paste link video Anda</p>
+      </div>
 
-            <!-- INLINE INPUT ROW -->
-            <div class="flex justify-center">
-                <div class="flex items-center gap-4 w-full max-w-2xl">
+      <div>
+        <div class="text-4xl mb-4">🤖</div>
+        <h3 class="font-semibold text-lg">AI Proses</h3>
+        <p class="text-gray-500">AI memilih momen terbaik otomatis</p>
+      </div>
 
-                    <!-- URL INPUT -->
-                    <div class="flex-[3]">
-                        {{ clipper_form.video_url(
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3
-                                   focus:ring-2 focus:ring-black focus:outline-none",
-                            placeholder="Paste YouTube / TikTok link"
-                        ) }}
-                    </div>
+      <div>
+        <div class="text-4xl mb-4">🚀</div>
+        <h3 class="font-semibold text-lg">Siap Posting</h3>
+        <p class="text-gray-500">Download klip siap upload ke sosial media</p>
+      </div>
 
-                    <!-- OR -->
-                    <div class="text-gray-400 text-sm font-medium whitespace-nowrap">
-                        OR
-                    </div>
+    </div>
+  </div>
+</section>
 
-                    <!-- FILE INPUT -->
-                     <div class="flex-[1]">
-                        <a href="/register" class="bg-black text-white px-4 py-2 rounded-lg cursor-pointer">
-                        Upload File
-                        </a>
-                    </div>
+<section class="py-20 bg-gray-50">
+  <div class="max-w-5xl mx-auto text-center">
 
-                </div>
-            </div>
+    <h2 class="text-3xl font-bold mb-10">Dipercaya Creator</h2>
 
-            <!-- SUBMIT -->
-            <div class="max-w-2xl mx-auto">
-                {{ clipper_form.submit(
-                    class="w-full bg-black text-white py-3 rounded-lg
-                           hover:bg-gray-800 transition font-medium"
-                ) }}
-            </div>
+    <div class="grid md:grid-cols-3 gap-6">
 
-        </form>
+      <div class="p-6 border rounded-xl">
+        <p class="text-gray-600">
+          "Hemat waktu banget, biasanya edit 2 jam sekarang 10 menit!"
+        </p>
+        <span class="block mt-4 font-semibold">— Content Creator</span>
+      </div>
+
+      <div class="p-6 border rounded-xl">
+        <p class="text-gray-600">
+          "Auto clipper-nya akurat, tinggal upload langsung jadi."
+        </p>
+        <span class="block mt-4 font-semibold">— YouTuber</span>
+      </div>
+
+      <div class="p-6 border rounded-xl">
+        <p class="text-gray-600">
+          "Cocok buat TikTok & Reels, gak ribet!"
+        </p>
+        <span class="block mt-4 font-semibold">— Social Media Manager</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-6 py-20">
+
+    <!-- HERO -->
+    <div class="text-center mb-16 space-y-4">
+        <h1 class="text-4xl md:text-5xl font-bold">Choose Your Plan</h1>
+        <p class="text-gray-500 max-w-2xl mx-auto">
+            Whether you’re just starting or need full features, we’ve got a plan for you.
+        </p>
+    </div>
+
+    <!-- PRICING CARDS -->
+    <div class="grid gap-8 md:grid-cols-3">
+
+        <!-- Free Plan -->
+        <div class="border rounded-2xl p-8 flex flex-col items-center text-center hover:shadow-xl transition">
+            <h2 class="text-xl font-semibold mb-2">Free</h2>
+            <p class="text-gray-500 mb-6">Perfect for trying out Clippera</p>
+            <span class="text-4xl font-bold mb-4">$0</span>
+            <span class="text-gray-500 mb-6">per month</span>
+
+            <ul class="text-left mb-6 space-y-2">
+                <li>✔ 5 clips per month</li>
+                <li>✔ Auto subtitles</li>
+                <li>✔ Basic aspect ratios</li>
+                <li class="line-through text-gray-300">✖ Premium features</li>
+            </ul>
+
+            {% if session.get("user_id") %}
+            <a href="/auto-clipper" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
+                Start Free
+            </a>
+            {% else %}
+            <a href="{{ url_for('auth.register') }}" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
+                Sign Up Free
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="border-2 border-black rounded-2xl p-8 flex flex-col items-center text-center shadow-md hover:shadow-xl transition">
+            <h2 class="text-xl font-semibold mb-2">Pro</h2>
+            <p class="text-gray-500 mb-6">For creators who need more power</p>
+            <span class="text-4xl font-bold mb-4">$19</span>
+            <span class="text-gray-500 mb-6">per month</span>
+
+            <ul class="text-left mb-6 space-y-2">
+                <li>✔ 100 clips per month</li>
+                <li>✔ Auto subtitles</li>
+                <li>✔ All aspect ratios</li>
+                <li>✔ Priority processing</li>
+            </ul>
+
+            {% if session.get("user_id") %}
+            <a href="{{ url_for('payment.buytokenpage') }}" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
+                Upgrade to Pro
+            </a>
+            {% else %}
+            <a href="{{ url_for('auth.register') }}" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
+                Sign Up & Upgrade
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Enterprise Plan -->
+        <div class="border rounded-2xl p-8 flex flex-col items-center text-center hover:shadow-xl transition">
+            <h2 class="text-xl font-semibold mb-2">Enterprise</h2>
+            <p class="text-gray-500 mb-6">For teams and businesses</p>
+            <span class="text-4xl font-bold mb-4">Custom</span>
+            <span class="text-gray-500 mb-6">per month</span>
+
+            <ul class="text-left mb-6 space-y-2">
+                <li>✔ Unlimited clips</li>
+                <li>✔ Team accounts</li>
+                <li>✔ Dedicated support</li>
+                <li>✔ Custom features</li>
+            </ul>
+
+            <a href="/contact" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
+                Contact Sales
+            </a>
+        </div>
 
     </div>
 
 </section>
+
+    
 
 
 {% endblock %}

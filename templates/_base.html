@@ -114,9 +114,64 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white text-center py-6 text-sm text-gray-500 border-t">
-        © 2026 VideoTool — Built with Flask + FFmpeg
-    </footer>
+    <footer class="bg-white border-t mt-20">
+
+  <div class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-4 gap-10">
+
+    <!-- BRAND -->
+    <div>
+      <h2 class="text-lg font-bold mb-3">🎬 Clippera</h2>
+      <p class="text-gray-500 text-sm leading-relaxed">
+        Ubah video panjang menjadi klip pendek siap posting dengan bantuan AI.
+      </p>
+    </div>
+
+    <!-- PRODUCT -->
+    <div>
+      <h3 class="font-semibold mb-4">Product</h3>
+      <ul class="space-y-2 text-gray-500 text-sm">
+        <li><a href="/auto-clipper" class="hover:text-black">Auto Clipper</a></li>
+        <li><a href="/auto-subtitle" class="hover:text-black">Auto Subtitle</a></li>
+        <li><a href="/aspect-ratio" class="hover:text-black">Aspect Ratio</a></li>
+        <li><a href="/price" class="hover:text-black">Pricing</a></li>
+      </ul>
+    </div>
+
+    <!-- COMPANY -->
+    <div>
+      <h3 class="font-semibold mb-4">Company</h3>
+      <ul class="space-y-2 text-gray-500 text-sm">
+        <li><a href="#" class="hover:text-black">About</a></li>
+        <li><a href="#" class="hover:text-black">Contact</a></li>
+        <li><a href="#" class="hover:text-black">Blog</a></li>
+      </ul>
+    </div>
+
+    <!-- CTA / NEWSLETTER -->
+    <div>
+      <h3 class="font-semibold mb-4">Stay Updated</h3>
+      <p class="text-gray-500 text-sm mb-4">
+        Dapatkan update fitur terbaru dari Clippera.
+      </p>
+
+      <form class="flex">
+        <input type="email" placeholder="Email kamu"
+               class="w-full px-3 py-2 border rounded-l-lg text-sm focus:outline-none">
+        <button type="submit"
+                class="bg-black text-white px-4 py-2 text-sm rounded-r-lg hover:bg-gray-800">
+          Subscribe
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="border-t py-6 text-center text-sm text-gray-500">
+    © 2026 Clippera — Built with Flask + FFmpeg
+  </div>
+
+</footer>
 {% block scripts %}{% endblock %}
 
 <script>

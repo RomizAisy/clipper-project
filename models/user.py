@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
-from datetime import datetime
+from datetime import datetime, timedelta
 from helper.plans import PLANS
 
 
@@ -25,6 +25,14 @@ class User(db.Model):
         default=3   # free plan limit
     )
 
+    subscription_start = db.Column(
+    db.Date,
+    nullable=False,
+    default=lambda: datetime.utcnow().date()
+    )
+
+    used_this_cycle = db.Column(db.Integer, default=0)
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -39,12 +47,39 @@ class User(db.Model):
             self.last_reset = datetime.utcnow().date()
             db.session.commit()
 
+    def reset_subscription_if_needed(self):
+        """Reset monthly usage every 30 days (for paid users only)."""
+        plan_info = PLANS.get(self.plan, {})
+
+        if plan_info.get("is_free"):
+            return
+
+        today = datetime.utcnow().date()
+
+        if today >= self.subscription_start + timedelta(days=30):
+            self.used_this_cycle = 0
+            self.subscription_start = today
+            db.session.commit()
+
     def remaining_quota(self):
         plan_info = PLANS.get(self.plan, {})
-        if plan_info.get("is_free"):
-            # Free users never reset daily
-            return max(0, plan_info["daily_limit"] - self.used_today)
+
+        if plan_info.get("is_free") and self.last_reset != datetime.utcnow().date():
+            self.used_today = 0
+            self.last_reset = datetime.utcnow().date()
+
         else:
-            # Paid users: daily limit applies
-            self.reset_if_needed()
-            return max(0, plan_info["daily_limit"] - self.used_today)
+            # Paid → monthly system
+            self.reset_subscription_if_needed()
+            return max(0, plan_info["monthly_limit"] - self.used_this_cycle)
+        
+    def consume_quota(self, amount=1):
+        plan_info = PLANS.get(self.plan, {})
+
+        if plan_info.get("is_free"):
+            self.used_today += amount
+        else:
+            self.reset_subscription_if_needed()
+            self.used_this_cycle += amount
+
+        db.session.commit()

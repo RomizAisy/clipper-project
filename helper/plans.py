@@ -8,16 +8,19 @@ PLANS = {
     "starter": {
         "name": "Starter",
         "price": 20000,
-        "daily_limit": 5
+        "daily_limit": 5,
+        "is_free": False
     },
     "pro": {
         "name": "Pro",
         "price": 70000,
-        "daily_limit": 10
+        "daily_limit": 10,
+        "is_free": False
     },
     "max": {
         "name": "Max",
         "price": 150000,
-        "daily_limit": 20  # top plan with 20 videos/day
+        "daily_limit": 20,
+        "is_free": False  
     }
 }
