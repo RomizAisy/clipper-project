@@ -1,191 +1,242 @@
 <!DOCTYPE html>
 <html lang="en" class="font-sans">
+
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Clippera{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>{% block title %}Clippera{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
-   
-    <!-- Tailwind CSS -->
-    <link href="{{ url_for('static', filename='src/output.css') }}" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Syne:wght@400..800&family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap"
+    rel="stylesheet">
 
-    {% block head_extra %}{% endblock %}
+  <!-- Tailwind CSS -->
+  <link href="{{ url_for('static', filename='src/output.css') }}" rel="stylesheet">
+
+  {% block head_extra %}{% endblock %}
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col antialiased">
 
-<!-- Navbar -->
-<nav class="sticky top-0 z-50 bg-gray-50 text-black border-b-2 border-gray-200">
+<body class="bg-[#0a0a0a] text-[#f0ede8] min-h-screen flex flex-col antialiased">
 
-  <!-- NAV ROW -->
-  <div class="relative items-center w-[90%] m-auto py-4 flex justify-between">
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 
+            bg-[#0a0a0a]/10 backdrop-blur-md 
+            text-[#f0ede8] s">
 
-    <!-- LOGO -->
-    <div class="">
-      <a href="/" class="text-lg font-semibold hover:text-gray-300  transition-text duration-300">
-        🎬 Clippera
-      </a>
-    </div>
+    <!-- NAV ROW -->
+    <div class="relative items-center w-[90%] m-auto py-4 flex justify-between">
 
-    <!-- CENTER MENU (desktop) -->
-    <div class="hidden lg:flex justify-center gap-4 absolute left-1/2 -translate-x-1/2 ">
-      <a href="/auto-clipper" class="hover:text-gray-300 transition-text duration-300">Auto Clipper</a>
-      <a href="/auto-subtitle" class="hover:text-gray-300 transition-text duration-300">Auto Subtitle</a>
-      <a href="/aspect-ratio" class="hover:text-gray-300 transition-text duration-300">Aspect Ratio</a>
-      <a href="/price" class="hover:text-gray-300 transition-text duration-300">Pricing</a>
-    </div>
+      <!-- LOGO -->
+      <div>
+        <a href="/" class="text-lg font-semibold hover:text-gray-300 transition duration-300">
+          🎬 Clippera
+        </a>
+      </div>
 
-    <!-- RIGHT SIDE -->
-    <div class="flex justify-end items-center">
-      <!-- Desktop buttons -->
-      <div class="lg:flex hidden gap-4">
-        {% if session.get("user_id") %}
-            <a href="/buytoken" class="text-center bg-white text-black hover:bg-black hover:text-white px-4 py-2 text-sm rounded-md font-medium">Buy Token</a>
-          <a href="/logout" class="hover:bg-white hover:text-black px-4 py-2 text-sm rounded-md font-medium">
+      <!-- CENTER MENU (desktop) -->
+      <div class="hidden lg:flex justify-center gap-4 absolute left-1/2 -translate-x-1/2">
+        <a href="/auto-clipper" class="hover:text-gray-300 transition duration-300">Auto Clipper</a>
+        <a href="/auto-subtitle" class="hover:text-gray-300 transition duration-300">Auto Subtitle</a>
+        <a href="/aspect-ratio" class="hover:text-gray-300 transition duration-300">Aspect Ratio</a>
+        <a href="/price" class="hover:text-gray-300 transition duration-300">Pricing</a>
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="flex justify-end items-center">
+        <div class="lg:flex hidden gap-4">
+          {% if session.get("user_id") %}
+          <a href="/buytoken"
+            class="bg-white/80 text-black hover:bg-white px-4 py-2 text-sm rounded-md font-medium backdrop-blur-sm">
+            Buy Token
+          </a>
+          <a href="/logout" class="hover:bg-white/20 px-4 py-2 text-sm rounded-md font-medium transition">
             Logout
           </a>
-        {% else %}
-          <a href="/login" class="text-center bg-white text-black hover:bg-black hover:text-white px-4 py-2 text-sm rounded-md font-medium transition duration-300 ease-in-out">
+          {% else %}
+          <a href="/login" class="px-4 py-2 text-sm font-medium rounded-md
+          text-white/80
+          bg-white/5 border border-white/10
+          backdrop-blur
+          hover:bg-white/10 hover:text-white
+          transition duration-300">
             Login
           </a>
           <a href="/register"
-             class="block text-center bg-black text-white 
-          hover:bg-white hover:text-black
-          px-4 py-2 text-sm rounded-md font-medium
-          transition duration-300 ease-in-out">
+          class="relative inline-flex items-center justify-center
+                  px-5 py-2.5 text-sm font-semibold rounded-md
+                  text-white
+                  bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+                  hover:from-red-400 hover:to-orange-200
+                  transition-all duration-300
+                  shadow-lg shadow-orange-400/20
+                  hover:shadow-orange-400/40
+                  hover:-translate-y-0.5">
+
+          <!-- Glow -->
+          <span class="absolute inset-0 rounded-md blur opacity-30
+                      bg-gradient-to-r from-red-500 via-orange-400 to-orange-300"></span>
+
+          <!-- Text -->
+          <span class="relative z-10 flex items-center gap-2">
             Signup for Free Trial
-          </a>
-        {% endif %}
-        
-        
+          </span>
+        </a>
+          {% endif %}
+        </div>
+
+        <button id="menuBtn" class="lg:hidden">
+          ☰
+        </button>
       </div>
-      <button id="menuBtn" class="lg:hidden">
-        ☰
-      </button>
-    
-      
     </div>
-  </div>
 
-  <!-- Mobile Menu -->
-  <div id="mobileMenu" class="hidden px-6 py-4 space-y-4 border-t border-gray-700 md:hidden text-center">
-    <a href="/auto-clipper" class="block">Auto Clipper</a>
-    <a href="/auto-subtitle" class="block">Auto Subtitle</a>
-    <a href="/aspect-ratio" class="block">Aspect Ratio</a>
-    <a href="/pricing" class="block">Pricing</a>
-    
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden px-6 py-4 space-y-4 
+              border-t border-white/20 
+              bg-white/10 backdrop-blur-md 
+              text-center md:hidden">
 
-    <!-- Mobile Hamburger -->
-      
+      <a href="/auto-clipper" class="block">Auto Clipper</a>
+      <a href="/auto-subtitle" class="block">Auto Subtitle</a>
+      <a href="/aspect-ratio" class="block">Aspect Ratio</a>
+      <a href="/pricing" class="block">Pricing</a>
 
-    {% if session.get("user_id") %}
+      {% if session.get("user_id") %}
       <a href="/logout" class="block text-center">Logout</a>
       <a href="/buytoken" class="block text-center">Buy Token</a>
-    {% else %}
+      {% else %}
       <a href="/login" class="block text-center bg-white text-black py-2 rounded">
         Login
       </a>
+      {% endif %}
+    </div>
+  </nav>
+
+
+
+
+  <!-- Main Content -->
+  <main class="flex-1 container mx-auto px-6 py-10">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-md bg-[#0a0a0a] text-[#f0ede8] border border-red-700 text-sm">
+      {{ message }}
+    </div>
+    {% endfor %}
     {% endif %}
-  </div>
-</nav>
+    {% endwith %}
 
+    {% block content %}
+    {% endblock %}
 
+  </main>
 
+  <!-- Footer -->
+  <footer class="bg-[#0a0a0a] text-[#f0ede8] mt-20">
 
-    <!-- Main Content -->
-    <main class="flex-1 container mx-auto px-6 py-10">
+    <div class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-4 gap-10">
 
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="mb-4 p-4 rounded-md bg-blue-100 text-blue-800">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+      <!-- BRAND -->
+      <div>
+        <h2 class="text-lg font-bold mb-3">🎬 Clippera</h2>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          Ubah video panjang menjadi klip pendek siap posting dengan bantuan AI.
+        </p>
+      </div>
 
-        {% block content %}
-        {% endblock %}
+      <!-- PRODUCT -->
+      <div>
+        <h3 class="font-semibold mb-4">Product</h3>
+        <ul class="space-y-2 text-gray-500 text-sm">
+          <li><a href="/auto-clipper" class="hover:text-black">Auto Clipper</a></li>
+          <li><a href="/auto-subtitle" class="hover:text-black">Auto Subtitle</a></li>
+          <li><a href="/aspect-ratio" class="hover:text-black">Aspect Ratio</a></li>
+          <li><a href="/price" class="hover:text-black">Pricing</a></li>
+        </ul>
+      </div>
 
-    </main>
+      <!-- COMPANY -->
+      <div>
+        <h3 class="font-semibold mb-4">Company</h3>
+        <ul class="space-y-2 text-gray-500 text-sm">
+          <li><a href="#" class="hover:text-black">About</a></li>
+          <li><a href="#" class="hover:text-black">Contact</a></li>
+          <li><a href="#" class="hover:text-black">Blog</a></li>
+        </ul>
+      </div>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t mt-20">
+      <!-- CTA / NEWSLETTER -->
+      <div>
+        <h3 class="font-semibold mb-4">Stay Updated</h3>
+        <p class="text-gray-500 text-sm mb-4">
+          Dapatkan update fitur terbaru dari Clippera.
+        </p>
 
-  <div class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-4 gap-10">
+        <form class="flex w-full max-w-md">
 
-    <!-- BRAND -->
-    <div>
-      <h2 class="text-lg font-bold mb-3">🎬 Clippera</h2>
-      <p class="text-gray-500 text-sm leading-relaxed">
-        Ubah video panjang menjadi klip pendek siap posting dengan bantuan AI.
-      </p>
+  <!-- INPUT -->
+  <input type="email" placeholder="Email kamu"
+    class="w-full px-4 py-2.5 text-sm
+           bg-white/5 text-white placeholder-neutral-400
+           border border-white/10 border-r-0
+           rounded-l-lg
+           backdrop-blur
+           focus:outline-none focus:ring-2 focus:ring-orange-400/40
+           transition">
+
+  <!-- BUTTON -->
+  <button type="submit"
+    class="relative px-5 py-2.5 text-sm font-semibold text-white
+           rounded-r-lg
+           bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+           hover:from-red-400 hover:to-orange-200
+           transition-all duration-300
+           shadow-md shadow-orange-400/20
+           hover:shadow-orange-400/40
+           hover:-translate-y-0.5">
+
+    <!-- Glow -->
+    <span class="absolute inset-0 rounded-r-lg blur opacity-25
+                 bg-gradient-to-r from-red-500 via-orange-400 to-orange-300"></span>
+
+    <span class="relative z-10">
+      Subscribe
+    </span>
+  </button>
+
+</form>
+      </div>
+
     </div>
 
-    <!-- PRODUCT -->
-    <div>
-      <h3 class="font-semibold mb-4">Product</h3>
-      <ul class="space-y-2 text-gray-500 text-sm">
-        <li><a href="/auto-clipper" class="hover:text-black">Auto Clipper</a></li>
-        <li><a href="/auto-subtitle" class="hover:text-black">Auto Subtitle</a></li>
-        <li><a href="/aspect-ratio" class="hover:text-black">Aspect Ratio</a></li>
-        <li><a href="/price" class="hover:text-black">Pricing</a></li>
-      </ul>
+    <!-- BOTTOM BAR -->
+    <div class="bg-[#0a0a0a] text-[#f0ede8] py-6 text-center text-sm ">
+      © 2026 Clippera — Built with Flask + FFmpeg
     </div>
 
-    <!-- COMPANY -->
-    <div>
-      <h3 class="font-semibold mb-4">Company</h3>
-      <ul class="space-y-2 text-gray-500 text-sm">
-        <li><a href="#" class="hover:text-black">About</a></li>
-        <li><a href="#" class="hover:text-black">Contact</a></li>
-        <li><a href="#" class="hover:text-black">Blog</a></li>
-      </ul>
-    </div>
+  </footer>
+  {% block scripts %}{% endblock %}
 
-    <!-- CTA / NEWSLETTER -->
-    <div>
-      <h3 class="font-semibold mb-4">Stay Updated</h3>
-      <p class="text-gray-500 text-sm mb-4">
-        Dapatkan update fitur terbaru dari Clippera.
-      </p>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("menuBtn");
+      const menu = document.getElementById("mobileMenu");
 
-      <form class="flex">
-        <input type="email" placeholder="Email kamu"
-               class="w-full px-3 py-2 border rounded-l-lg text-sm focus:outline-none">
-        <button type="submit"
-                class="bg-black text-white px-4 py-2 text-sm rounded-r-lg hover:bg-gray-800">
-          Subscribe
-        </button>
-      </form>
-    </div>
-
-  </div>
-
-  <!-- BOTTOM BAR -->
-  <div class="border-t py-6 text-center text-sm text-gray-500">
-    © 2026 Clippera — Built with Flask + FFmpeg
-  </div>
-
-</footer>
-{% block scripts %}{% endblock %}
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("menuBtn");
-    const menu = document.getElementById("mobileMenu");
-
-    btn?.addEventListener("click", () => {
+      btn?.addEventListener("click", () => {
         menu.classList.toggle("hidden");
         menu.classList.toggle("animate-slideDown");
+      });
     });
-});
-</script>
+  </script>
 
 
 </body>
+
 </html>

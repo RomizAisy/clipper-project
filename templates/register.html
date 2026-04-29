@@ -4,99 +4,122 @@
 
 {% block content %}
 
-<section class="bg-gray-50 min-h-screen flex justify-center items-start pt-16 md:pt-24">
+<section class="min-h-fit flex items-center justify-center px-6
+                bg-gradient-to-b from-black via-neutral-950 to-black text-white">
 
-    <div class="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 space-y-6">
+  <div class="w-full max-w-md">
 
-        <!-- HEADER -->
-        <div class="text-center space-y-2">
-            <h1 class="text-3xl font-bold">Create Account</h1>
-            <p class="text-gray-500 text-sm">
-                Start creating clips and subtitles instantly.
-            </p>
+    <!-- CARD -->
+    <div class="bg-white/5 backdrop-blur border border-white/10
+                rounded-2xl p-8 space-y-6 shadow-xl">
+
+      <!-- HEADER -->
+      <div class="text-center space-y-2">
+        <h1 class="text-3xl font-bold">Create Account</h1>
+        <p class="text-neutral-400 text-sm">
+          Start creating clips and subtitles instantly.
+        </p>
+      </div>
+
+      <!-- FORM -->
+      <form action="/register" method="POST" class="space-y-4">
+        {{ form.hidden_tag() }}
+
+        <!-- USERNAME -->
+        <div class="space-y-1">
+          <label class="text-sm text-neutral-300">
+            {{ form.username.label.text }}
+          </label>
+
+          {{ form.username(
+            class="w-full px-4 py-3 rounded-lg
+                   bg-white/5 border border-white/10
+                   text-white placeholder-neutral-500
+                   focus:outline-none focus:ring-2 focus:ring-orange-400/40
+                   transition"
+          ) }}
+
+          {% for error in form.username.errors %}
+            <p class="text-red-400 text-sm">{{ error }}</p>
+          {% endfor %}
         </div>
 
-        <!-- FORM -->
-        <form action="/register" method="POST" class="space-y-4">
-            {{ form.hidden_tag() }}
+        <!-- EMAIL -->
+        <div class="space-y-1">
+          <label class="text-sm text-neutral-300">
+            {{ form.email.label.text }}
+          </label>
 
-            <!-- USERNAME -->
-            <div class="space-y-1">
-                <label class="text-sm font-medium text-gray-700">
-                    {{ form.username.label.text }}
-                </label>
-                {{ form.username(
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3
-                           focus:ring-2 focus:ring-black focus:outline-none"
-                ) }}
-
-                {% for error in form.username.errors %}
-                    <p class="text-red-500 text-sm">{{ error }}</p>
-                {% endfor %}
-            </div>
-
-            <!-- EMAIL -->
-            <div class="space-y-1">
-                <label class="text-sm font-medium text-gray-700">
-                    {{ form.email.label.text }}
-                </label>
-                {{ form.email(
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3
-                           focus:ring-2 focus:ring-black focus:outline-none"
-                ) }}
-            </div>
-
-            <!-- PASSWORD -->
-            <div class="space-y-1">
-                <label class="text-sm font-medium text-gray-700">
-                    {{ form.password.label.text }}
-                </label>
-                {{ form.password(
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3
-                           focus:ring-2 focus:ring-black focus:outline-none"
-                ) }}
-            </div>
-
-            <!-- SUBMIT -->
-            <button
-                type="submit"
-                class="w-full bg-black text-white py-3 rounded-lg
-                       hover:bg-gray-800 transition font-medium">
-                Register
-            </button>
-        </form>
-
-        <!-- FLASH MESSAGES -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="space-y-2">
-                    {% for category, message in messages %}
-                        <div class="text-sm px-4 py-2 rounded-lg
-                                    {% if category == 'error' %}
-                                        bg-red-100 text-red-700
-                                    {% else %}
-                                        bg-green-100 text-green-700
-                                    {% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        <!-- LINKS -->
-        <div class="text-center text-sm text-gray-500 space-y-1">
-            <a href="{{ url_for('auth.login') }}" class="underline">
-                Already have an account? Login
-            </a>
-            <br>
-            <a href="{{ url_for('main.home') }}" class="underline">
-                ← Back to Homepage
-            </a>
+          {{ form.email(
+            class="w-full px-4 py-3 rounded-lg
+                   bg-white/5 border border-white/10
+                   text-white placeholder-neutral-500
+                   focus:outline-none focus:ring-2 focus:ring-orange-400/40
+                   transition"
+          ) }}
         </div>
+
+        <!-- PASSWORD -->
+        <div class="space-y-1">
+          <label class="text-sm text-neutral-300">
+            {{ form.password.label.text }}
+          </label>
+
+          {{ form.password(
+            class="w-full px-4 py-3 rounded-lg
+                   bg-white/5 border border-white/10
+                   text-white placeholder-neutral-500
+                   focus:outline-none focus:ring-2 focus:ring-orange-400/40
+                   transition"
+          ) }}
+        </div>
+
+        <!-- SUBMIT -->
+        <button type="submit"
+          class="w-full py-3 rounded-lg font-semibold
+                 bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+                 hover:from-red-400 hover:to-orange-200
+                 transition-all duration-300
+                 shadow-lg shadow-orange-400/20
+                 hover:shadow-orange-400/40 hover:-translate-y-0.5">
+          Create Account
+        </button>
+      </form>
+
+      <!-- FLASH -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="space-y-2">
+            {% for category, message in messages %}
+              <div class="text-sm px-4 py-2 rounded-lg border
+                {% if category == 'error' %}
+                  bg-red-500/10 border-red-500/20 text-red-400
+                {% else %}
+                  bg-green-500/10 border-green-500/20 text-green-400
+                {% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- LINKS -->
+      <div class="text-center text-sm text-neutral-400 space-y-2">
+        <a href="{{ url_for('auth.login') }}"
+           class="hover:text-white transition">
+          Already have an account? Login
+        </a>
+        <br>
+        <a href="{{ url_for('main.home') }}"
+           class="hover:text-white transition">
+          ← Back to Homepage
+        </a>
+      </div>
 
     </div>
 
+  </div>
 </section>
 
 {% endblock %}

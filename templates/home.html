@@ -4,17 +4,17 @@
 
 {% block content %}
 
-<section class="max-w-5xl mx-auto px-6 py-24">
+<section class="max-w-5xl mx-auto px-6 py-24 bg-[#0a0a0a] text-[#f0ede8]">
 
     <!-- HERO TEXT -->
-    <div class="text-center space-y-6 mb-10">
+    <div class="text-center space-y-6 mb-10 ">
 
         <h3 class="text-1xl md:text-1xl font-semibold tracking-tight leading-tight">
             BEST CLIPPER TOOL
         </h3>
 
-        <h1 class="text-4xl md:text-7xl uppercase font-mono font-black tracking-tighter leading-tight">
-            Ubah <span class="bg-gradient-to-r from-red-500 to-orange-300 bg-clip-text text-transparent">Video Panjang </span> Menjadi Klip Pendek Siap Posting
+        <h1 class="font-syne text-4xl md:text-7xl uppercase font-black tracking-tighter leading-tight">
+            Video Panjang jadi  <span class="bg-gradient-to-r from-red-500 to-orange-300 bg-clip-text text-transparent">Klip Viral </span> Dalam Detik
         </h1>
 
         <p class="text-gray-500 max-w-2xl mx-auto">
@@ -24,7 +24,7 @@
     </div>
     
     <!-- VIDEO UNDER HERO -->
-    <section class="py-16 md:py-24 bg-gray-50">
+    <section class="py-16 md:py-24 bg-[#0a0a0a] text-[#f0ede8]">
     <div class="max-w-6xl mx-auto sm:px-4 lg:px-6">
 
         <!-- Video Wrapper -->
@@ -43,16 +43,51 @@
             <div class="aspect-video w-full">
             <video
                 class="w-full h-full object-cover"
-                controls
+                id="demoVideo"
                 autoplay
                 muted
                 loop
                 playsinline
+                
             >
-                <source src="/static/video/demo.mp4" type="video/mp4">
+                <source src="/static/videos/sample_A.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
             </div>
+            <!-- FEATURE LINKS -->
+<div class="mt-10 flex flex-wrap justify-center gap-3">
+
+  <a href="#auto-clipper"
+     class="px-4 py-2 text-sm rounded-full
+            bg-white/5 border border-white/10
+            text-white/80
+            hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-300
+            hover:text-white
+            transition-all duration-300">
+    Auto Clipper
+  </a>
+
+  <a href="#auto-subtitle"
+     class="px-4 py-2 text-sm rounded-full
+            bg-white/5 border border-white/10
+            text-white/80
+            hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-300
+            hover:text-white
+            transition-all duration-300">
+    Auto Subtitle
+  </a>
+
+  <a href="#aspect-ratio"
+     class="px-4 py-2 text-sm rounded-full
+            bg-white/5 border border-white/10
+            text-white/80
+            hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-300
+            hover:text-white
+            transition-all duration-300">
+    Aspect Ratio
+  </a>
+
+</div>
 
         </div>
 
@@ -62,60 +97,151 @@
     </section>
 </section>
 
-    <!-- AUTO CLIPPER SECTION -->
-<section class="py-20 bg-gray-50 overflow-hidden">
+<section class="py-28 bg-[#0a0a0a] text-[#f0ede8] overflow-hidden">
     
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-28">
 
+    <!-- ===================== -->
+    <!-- 1. AUTO CLIPPER (normal) -->
+    <!-- ===================== -->
     <div class="grid md:grid-cols-2 gap-12 items-center">
 
-      <!-- LEFT : TEXT -->
-      <div>
-        <h2 class="text-3xl uppercase md:text-4xl font-bold tracking-tight">
+      <!-- TEXT -->
+      <div class="order-1">
+        <h2 class="text-3xl md:text-6xl font-black uppercase tracking-tight">
           Auto Clipper AI
         </h2>
 
-        <p class="mt-4 text-gray-600 text-lg leading-relaxed">
+        <p class="mt-4 text-lg text-neutral-400 leading-relaxed">
           Upload video panjang Anda dan biarkan AI secara otomatis 
-          menemukan momen terbaik, memotong bagian penting, dan 
-          menghasilkan klip pendek siap diposting ke TikTok, Reels,
-          atau YouTube Shorts.
+          menemukan momen terbaik dan menghasilkan klip siap posting.
         </p>
 
-        <!-- FEATURES LIST -->
-        <ul class="mt-6 space-y-3 text-gray-700">
+        <ul class="mt-6 space-y-3 text-neutral-300">
           <li>Deteksi momen penting otomatis</li>
           <li>Potong video tanpa editing manual</li>
-          <li>Siap format konten short video</li>
+          <li>Format siap short video</li>
           <li>Hemat waktu hingga 90%</li>
         </ul>
 
-        <!-- CTA -->
         <div class="mt-8">
           <a href="/register"
-             class="inline-block bg-red-600 text-white px-6 py-3 rounded-lg
-                    font-semibold hover:bg-red-700 transition">
+             class="inline-block px-6 py-3 rounded-lg font-semibold text-white
+                    bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+                    hover:from-red-400 hover:to-orange-200
+                    transition-all duration-300 shadow-lg shadow-orange-400/20
+                    hover:shadow-orange-400/40 hover:-translate-y-0.5">
             Coba Auto Clipper
           </a>
         </div>
       </div>
 
-      <!-- RIGHT : VISUAL -->
-      <div class="relative">
-
-        <!-- gradient glow -->
+      <!-- VIDEO -->
+      <div class="order-2 relative">
         <div class="absolute -inset-6 blur-3xl opacity-30 rounded-3xl
-                    bg-gradient-to-r from-red-400 via-yellow-300 to-red-400
-                    animate-gradient-move">
-        </div>
+                    bg-gradient-to-r from-red-500 via-orange-400 to-orange-300"></div>
 
-        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
-          <video class="w-full"
-                 autoplay muted loop playsinline>
-            <source src="/static/video/autoclipper-demo.mp4" type="video/mp4">
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl ">
+          <video class="w-full" autoplay muted loop playsinline>
+            <source src="/static/videos/sample_A.mp4" type="video/mp4">
           </video>
         </div>
+      </div>
 
+    </div>
+
+    <!-- ===================== -->
+    <!-- 2. AUTO SUBTITLE (reverse) -->
+    <!-- ===================== -->
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+
+      <!-- TEXT -->
+      <div class="order-1 md:order-2">
+        <h2 class="text-3xl md:text-6xl font-black uppercase tracking-tight">
+          Auto Subtitle
+        </h2>
+
+        <p class="mt-4 text-lg text-neutral-400 leading-relaxed">
+          Subtitle otomatis dengan akurasi tinggi yang langsung siap dipakai.
+        </p>
+
+        <ul class="mt-6 space-y-3 text-neutral-300">
+          <li>Generate subtitle otomatis</li>
+          <li>Sinkron dengan audio</li>
+          <li>Langsung burn ke video</li>
+          <li>Meningkatkan engagement</li>
+        </ul>
+
+        <div class="mt-8">
+          <a href="/register"
+             class="inline-block px-6 py-3 rounded-lg font-semibold text-white
+                    bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+                    hover:from-red-400 hover:to-orange-200
+                    transition-all duration-300 shadow-lg shadow-orange-400/20
+                    hover:shadow-orange-400/40 hover:-translate-y-0.5">
+            Coba Auto Subtitle
+          </a>
+        </div>
+      </div>
+
+      <!-- VIDEO -->
+      <div class="order-2 md:order-1 relative">
+        <div class="absolute -inset-6 blur-3xl opacity-30 rounded-3xl
+                    bg-gradient-to-r from-red-500 via-orange-400 to-orange-300"></div>
+
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+          <video class="w-full" autoplay muted loop playsinline>
+            <source src="/static/videos/sample_A.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- 3. ASPECT RATIO (normal lagi) -->
+    <!-- ===================== -->
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+
+      <!-- TEXT -->
+      <div class="order-1">
+        <h2 class="text-3xl md:text-6xl font-black uppercase tracking-tight">
+          Aspect Ratio
+        </h2>
+
+        <p class="mt-4 text-lg text-neutral-400 leading-relaxed">
+          Ubah video ke format TikTok, Reels, atau YouTube Shorts secara otomatis.
+        </p>
+
+        <ul class="mt-6 space-y-3 text-neutral-300">
+          <li>Vertical, square, landscape</li>
+          <li>Auto framing AI</li>
+          <li>Optimasi untuk tiap platform</li>
+          <li>Siap upload tanpa edit</li>
+        </ul>
+
+        <div class="mt-8">
+          <a href="/register"
+             class="inline-block px-6 py-3 rounded-lg font-semibold text-white
+                    bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+                    hover:from-red-400 hover:to-orange-200
+                    transition-all duration-300 shadow-lg shadow-orange-400/20
+                    hover:shadow-orange-400/40 hover:-translate-y-0.5">
+            Coba Aspect Ratio
+          </a>
+        </div>
+      </div>
+
+      <!-- VIDEO -->
+      <div class="order-2 relative">
+        <div class="absolute -inset-6 blur-3xl opacity-30 rounded-3xl
+                    bg-gradient-to-r from-red-500 via-orange-400 to-orange-300"></div>
+
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+          <video class="w-full" autoplay muted loop playsinline >
+            <source src="/static/videos/sample_A.mp4" type="video/mp4">
+          </video>
+        </div>
       </div>
 
     </div>
@@ -123,151 +249,287 @@
   </div>
 </section>
 
-<section class="py-20">
-  <div class="max-w-6xl mx-auto px-6 text-center">
+<section id="how" class="py-28 px-6 bg-gradient-to-b from-black via-neutral-950 to-black">
+  <div class="max-w-6xl mx-auto">
 
-    <h2 class="text-3xl font-bold mb-12">Cara Kerja</h2>
+    <!-- Header -->
+    <div class="text-center mb-20">
+      <p class="text-xs font-semibold tracking-[0.3em] uppercase text-red-500 mb-3">
+        Cara Kerja
+      </p>
+      <h2 class="font-black text-4xl md:text-5xl tracking-tight leading-tight text-white">
+        Tiga Langkah.<br>
+        <span class="bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
+          Satu Hasil.
+        </span>
+      </h2>
+    </div>
 
-    <div class="grid md:grid-cols-3 gap-10">
+    <!-- Steps -->
+    <div class="grid md:grid-cols-3 rounded-2xl overflow-hidden border border-white/10 backdrop-blur">
 
-      <div>
-        <div class="text-4xl mb-4">📤</div>
-        <h3 class="font-semibold text-lg">Upload Video</h3>
-        <p class="text-gray-500">Upload atau paste link video Anda</p>
+      <!-- Card -->
+      <div class="group relative p-10 bg-white/5 hover:bg-white/10 transition duration-300">
+        
+        <!-- Glow -->
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-red-500/10 via-transparent to-transparent"></div>
+
+        <p class="font-black text-6xl text-white/10 leading-none mb-6 select-none">
+          01
+        </p>
+
+        <span class="text-4xl block mb-5">📤</span>
+
+        <h3 class="font-semibold text-xl text-white mb-3">
+          Upload Video
+        </h3>
+
+        <p class="text-neutral-400 text-sm leading-relaxed">
+          Upload file dari perangkat Anda atau paste link YouTube, TikTok, atau platform lainnya.
+        </p>
       </div>
 
-      <div>
-        <div class="text-4xl mb-4">🤖</div>
-        <h3 class="font-semibold text-lg">AI Proses</h3>
-        <p class="text-gray-500">AI memilih momen terbaik otomatis</p>
+      <!-- Card -->
+      <div class="group relative p-10 bg-white/5 border-y md:border-y-0 md:border-x border-white/10 hover:bg-white/10 transition duration-300">
+        
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent"></div>
+
+        <p class="font-black text-6xl text-white/10 leading-none mb-6 select-none">
+          02
+        </p>
+
+        <span class="text-4xl block mb-5">🤖</span>
+
+        <h3 class="font-semibold text-xl text-white mb-3">
+          AI Proses
+        </h3>
+
+        <p class="text-neutral-400 text-sm leading-relaxed">
+          Model AI kami menganalisis konten, mendeteksi momen terbaik, dan memotong secara otomatis.
+        </p>
       </div>
 
-      <div>
-        <div class="text-4xl mb-4">🚀</div>
-        <h3 class="font-semibold text-lg">Siap Posting</h3>
-        <p class="text-gray-500">Download klip siap upload ke sosial media</p>
+      <!-- Card -->
+      <div class="group relative p-10 bg-white/5 hover:bg-white/10 transition duration-300">
+        
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent"></div>
+
+        <p class="font-black text-6xl text-white/10 leading-none mb-6 select-none">
+          03
+        </p>
+
+        <span class="text-4xl block mb-5">🚀</span>
+
+        <h3 class="font-semibold text-xl text-white mb-3">
+          Siap Posting
+        </h3>
+
+        <p class="text-neutral-400 text-sm leading-relaxed">
+          Download klip format vertikal siap upload ke TikTok, Reels, atau YouTube Shorts.
+        </p>
       </div>
 
     </div>
   </div>
 </section>
+<section class="py-28 px-6 bg-gradient-to-b from-black via-neutral-950 to-black text-[#f0ede8]">
+  <div class="max-w-6xl mx-auto text-center">
 
-<section class="py-20 bg-gray-50">
-  <div class="max-w-5xl mx-auto text-center">
+    <!-- Header -->
+    <h2 class="text-3xl md:text-4xl font-bold mb-14">
+      Dipercaya Creator
+    </h2>
 
-    <h2 class="text-3xl font-bold mb-10">Dipercaya Creator</h2>
+    <!-- Cards -->
+    <div class="grid md:grid-cols-3 gap-8">
 
-    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Card -->
+      <div class="group relative p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur hover:bg-white/10 transition duration-300">
 
-      <div class="p-6 border rounded-xl">
-        <p class="text-gray-600">
+        <!-- Glow -->
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-red-500/10 via-transparent to-transparent"></div>
+
+        <!-- Avatar -->
+        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl mb-5 mx-auto">
+          👤
+        </div>
+
+        <p class="text-neutral-300 leading-relaxed text-sm italic">
           "Hemat waktu banget, biasanya edit 2 jam sekarang 10 menit!"
         </p>
-        <span class="block mt-4 font-semibold">— Content Creator</span>
+
+        <span class="block mt-5 text-sm font-semibold text-white">
+          Content Creator
+        </span>
       </div>
 
-      <div class="p-6 border rounded-xl">
-        <p class="text-gray-600">
+      <!-- Card -->
+      <div class="group relative p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur hover:bg-white/10 transition duration-300">
+
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent"></div>
+
+        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl mb-5 mx-auto">
+          🎥
+        </div>
+
+        <p class="text-neutral-300 leading-relaxed text-sm italic">
           "Auto clipper-nya akurat, tinggal upload langsung jadi."
         </p>
-        <span class="block mt-4 font-semibold">— YouTuber</span>
+
+        <span class="block mt-5 text-sm font-semibold text-white">
+          YouTuber
+        </span>
       </div>
 
-      <div class="p-6 border rounded-xl">
-        <p class="text-gray-600">
+      <!-- Card -->
+      <div class="group relative p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur hover:bg-white/10 transition duration-300">
+
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent"></div>
+
+        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl mb-5 mx-auto">
+          📱
+        </div>
+
+        <p class="text-neutral-300 leading-relaxed text-sm italic">
           "Cocok buat TikTok & Reels, gak ribet!"
         </p>
-        <span class="block mt-4 font-semibold">— Social Media Manager</span>
+
+        <span class="block mt-5 text-sm font-semibold text-white">
+          Social Media Manager
+        </span>
       </div>
 
     </div>
   </div>
 </section>
 
-<section class="max-w-7xl mx-auto px-6 py-20">
+<section class="py-28 px-6 bg-gradient-to-b from-black via-neutral-950 to-black text-white">
+  <div class="max-w-7xl mx-auto">
 
-    <!-- HERO -->
-    <div class="text-center mb-16 space-y-4">
-        <h1 class="text-4xl md:text-5xl font-bold">Choose Your Plan</h1>
-        <p class="text-gray-500 max-w-2xl mx-auto">
-            Whether you’re just starting or need full features, we’ve got a plan for you.
-        </p>
+    <!-- Header -->
+    <div class="text-center mb-20">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        Choose Your Plan
+      </h1>
+      <p class="text-neutral-400 max-w-2xl mx-auto">
+        Whether you’re just starting or scaling your content, we’ve got you covered.
+      </p>
     </div>
 
-    <!-- PRICING CARDS -->
+    <!-- Pricing -->
     <div class="grid gap-8 md:grid-cols-3">
 
-        <!-- Free Plan -->
-        <div class="border rounded-2xl p-8 flex flex-col items-center text-center hover:shadow-xl transition">
-            <h2 class="text-xl font-semibold mb-2">Free</h2>
-            <p class="text-gray-500 mb-6">Perfect for trying out Clippera</p>
-            <span class="text-4xl font-bold mb-4">$0</span>
-            <span class="text-gray-500 mb-6">per month</span>
+      <!-- FREE -->
+      <div class="group relative p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur hover:bg-white/10 transition duration-300">
 
-            <ul class="text-left mb-6 space-y-2">
-                <li>✔ 5 clips per month</li>
-                <li>✔ Auto subtitles</li>
-                <li>✔ Basic aspect ratios</li>
-                <li class="line-through text-gray-300">✖ Premium features</li>
-            </ul>
+        <h2 class="text-xl font-semibold mb-2">Free</h2>
+        <p class="text-neutral-400 mb-6">Perfect for trying out</p>
 
-            {% if session.get("user_id") %}
-            <a href="/auto-clipper" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
-                Start Free
-            </a>
-            {% else %}
-            <a href="{{ url_for('auth.register') }}" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
-                Sign Up Free
-            </a>
-            {% endif %}
+        <div class="mb-6">
+          <span class="text-4xl font-bold">$0</span>
+          <span class="text-neutral-400 text-sm"> / month</span>
         </div>
 
-        <!-- Pro Plan -->
-        <div class="border-2 border-black rounded-2xl p-8 flex flex-col items-center text-center shadow-md hover:shadow-xl transition">
-            <h2 class="text-xl font-semibold mb-2">Pro</h2>
-            <p class="text-gray-500 mb-6">For creators who need more power</p>
-            <span class="text-4xl font-bold mb-4">$19</span>
-            <span class="text-gray-500 mb-6">per month</span>
+        <ul class="text-sm text-neutral-300 space-y-3 mb-8">
+          <li>✔ 5 clips per month</li>
+          <li>✔ Auto subtitles</li>
+          <li>✔ Basic aspect ratios</li>
+          <li class="line-through text-neutral-500">Premium features</li>
+        </ul>
 
-            <ul class="text-left mb-6 space-y-2">
-                <li>✔ 100 clips per month</li>
-                <li>✔ Auto subtitles</li>
-                <li>✔ All aspect ratios</li>
-                <li>✔ Priority processing</li>
-            </ul>
+        {% if session.get("user_id") %}
+        <a href="/auto-clipper" class="block text-center w-full py-3 rounded-lg bg-white/10 hover:bg-white/20 transition">
+          Start Free
+        </a>
+        {% else %}
+        <a href="{{ url_for('auth.register') }}" class="block text-center w-full py-3 rounded-lg bg-white/10 hover:bg-white/20 transition">
+          Sign Up Free
+        </a>
+        {% endif %}
+      </div>
 
-            {% if session.get("user_id") %}
-            <a href="{{ url_for('payment.buytokenpage') }}" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
-                Upgrade to Pro
-            </a>
-            {% else %}
-            <a href="{{ url_for('auth.register') }}" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
-                Sign Up & Upgrade
-            </a>
-            {% endif %}
-        </div>
+      <!-- PRO (HIGHLIGHT) -->
+<div class="relative group p-[1px] rounded-2xl 
+            bg-gradient-to-br from-red-500 via-orange-400 to-orange-300">
 
-        <!-- Enterprise Plan -->
-        <div class="border rounded-2xl p-8 flex flex-col items-center text-center hover:shadow-xl transition">
-            <h2 class="text-xl font-semibold mb-2">Enterprise</h2>
-            <p class="text-gray-500 mb-6">For teams and businesses</p>
-            <span class="text-4xl font-bold mb-4">Custom</span>
-            <span class="text-gray-500 mb-6">per month</span>
+  <!-- Glow -->
+  <div class="absolute inset-0 blur-xl opacity-30 
+              bg-gradient-to-br from-red-500 via-orange-400 to-orange-300 
+              group-hover:opacity-50 transition duration-500"></div>
 
-            <ul class="text-left mb-6 space-y-2">
-                <li>✔ Unlimited clips</li>
-                <li>✔ Team accounts</li>
-                <li>✔ Dedicated support</li>
-                <li>✔ Custom features</li>
-            </ul>
+  <div class="relative h-full w-full rounded-2xl bg-black/90 p-8 backdrop-blur">
 
-            <a href="/contact" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">
-                Contact Sales
-            </a>
-        </div>
-
+    <!-- Badge -->
+    <div class="absolute top-0 right-0 px-3 py-1 text-xs font-semibold
+                bg-gradient-to-r from-red-500 to-orange-400
+                rounded-bl-xl rounded-tr-xl shadow-md">
+      MOST POPULAR
     </div>
 
+    <h2 class="text-xl font-semibold mb-2">Pro</h2>
+    <p class="text-neutral-400 mb-6">For serious creators</p>
+
+    <div class="mb-6">
+      <span class="text-4xl font-bold">$19</span>
+      <span class="text-neutral-400 text-sm"> / month</span>
+    </div>
+
+    <ul class="text-sm text-neutral-300 space-y-3 mb-8">
+      <li>✔ 100 clips per month</li>
+      <li>✔ Auto subtitles</li>
+      <li>✔ All aspect ratios</li>
+      <li>✔ Priority processing</li>
+    </ul>
+
+    {% if session.get("user_id") %}
+    <a href="{{ url_for('payment.buytokenpage') }}"
+       class="block text-center w-full py-3 rounded-lg font-semibold
+              bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+              hover:from-red-400 hover:to-orange-200
+              transition-all duration-300
+              shadow-lg shadow-orange-400/20
+              hover:shadow-orange-400/40 hover:-translate-y-0.5">
+      Upgrade to Pro
+    </a>
+    {% else %}
+    <a href="{{ url_for('auth.register') }}"
+       class="block text-center w-full py-3 rounded-lg font-semibold
+              bg-gradient-to-r from-red-500 via-orange-400 to-orange-300
+              hover:from-red-400 hover:to-orange-200
+              transition-all duration-300
+              shadow-lg shadow-orange-400/20
+              hover:shadow-orange-400/40 hover:-translate-y-0.5">
+      Sign Up & Upgrade
+    </a>
+    {% endif %}
+
+  </div>
+</div>
+
+      <!-- ENTERPRISE -->
+      <div class="group relative p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur hover:bg-white/10 transition duration-300">
+
+        <h2 class="text-xl font-semibold mb-2">Enterprise</h2>
+        <p class="text-neutral-400 mb-6">For teams & business</p>
+
+        <div class="mb-6">
+          <span class="text-4xl font-bold">Custom</span>
+        </div>
+
+        <ul class="text-sm text-neutral-300 space-y-3 mb-8">
+          <li>✔ Unlimited clips</li>
+          <li>✔ Team accounts</li>
+          <li>✔ Dedicated support</li>
+          <li>✔ Custom features</li>
+        </ul>
+
+        <a href="/contact" class="block text-center w-full py-3 rounded-lg bg-white/10 hover:bg-white/20 transition">
+          Contact Sales
+        </a>
+      </div>
+
+    </div>
+  </div>
 </section>
 
     
