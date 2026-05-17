@@ -68,15 +68,24 @@ def get_user_clip_with_outputs(user_id):
     return results
 
 
-def get_user_jobs_with_outputs(user_id):
-    jobs = VideoJob.query.filter_by(user_id=user_id).order_by(VideoJob.id.desc()).all()
+def get_user_jobs_with_outputs(guest_id):
+    jobs = (
+        VideoJob.query
+        .filter_by(guest_id=guest_id)
+        .order_by(VideoJob.id.desc())
+        .all()
+    )
 
     results = []
 
     for job in jobs:
-        clips_dir = os.path.join(job.job_dir, "clips") if job.job_dir else None
+        clips_dir = (
+            os.path.join(job.job_dir, "clips")
+            if job.job_dir else None
+        )
 
         clips = []
+
         if clips_dir and os.path.exists(clips_dir):
             clips = [
                 f for f in os.listdir(clips_dir)
@@ -90,4 +99,3 @@ def get_user_jobs_with_outputs(user_id):
         })
 
     return results
-

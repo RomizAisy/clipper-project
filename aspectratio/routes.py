@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, current_app
 from flask import current_app
-
+import uuid
 import os, tempfile, time, traceback
 from werkzeug.utils import secure_filename
 from threading import Thread
@@ -22,35 +22,30 @@ from models import VideoJob, User
 
 aspect_bp = Blueprint( "aspect", __name__)
 
+
 @aspect_bp.route("/aspect-ratio")
 def aspect_page():
-    
+
+    if "guest_id" not in session:
+        session["guest_id"] = str(uuid.uuid4())
 
     form = AspectFileForm()
-    user_id = session.get("user_id")  # ✅ safe acces
 
-    if user_id:
-        jobs = get_user_jobs_with_outputs(user_id)
-        return render_template(
+    jobs = get_user_jobs_with_outputs(
+        session["guest_id"]
+    )
+
+    return render_template(
         "aspectRatio.html",
         form=form,
         jobs=jobs
     )
-    else:
-        jobs = []  # guest has no jobs
-    
-    return render_template(
-        "guestAspect.html",
-        form=form,
-        jobs=jobs
-    )
-
 @aspect_bp.route("/aspect-change", methods = ["POST", "GET"])
 def aspect_ratio():
     form = AspectFileForm()
-    if "user_id" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
 
+    if "guest_id" not in session:
+        abort(401)
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400
     
@@ -78,20 +73,16 @@ def aspect_ratio():
         return jsonify({"error": "No video provided"}), 400
     
 
-    # Get user
-    user = User.query.get(session["user_id"])
-
-
     # Now create VideoJob
     job = VideoJob(
-        user_id=user.id,
-        status="processing",
-        progress=0,
-        step="uploaded",
-        job_dir=job_dir,
-        original_filename=os.path.basename(save_path),
-        job_type="aspect",
-    )
+    guest_id=session["guest_id"],
+    status="processing",
+    progress=0,
+    step="uploaded",
+    job_dir=job_dir,
+    original_filename=os.path.basename(save_path),
+    job_type="aspect",
+)
 
     db.session.add(job)
     db.session.commit()
@@ -197,14 +188,13 @@ def download_from_link(url, job_dir):
 
 @aspect_bp.route("/aspect-status/<int:job_id>")
 def aspect_status(job_id):
-    if "user_id" not in session:
+
+    if "guest_id" not in session:
         abort(401)
 
-    job = VideoJob.query.get(job_id)
-    if not job:
-        return jsonify({"status": "not_found"}), 404
+    job = VideoJob.query.get_or_404(job_id)
 
-    if job.user_id != session["user_id"]:
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
     return jsonify({
@@ -225,15 +215,17 @@ def aspect_thumbnail(job_id):
 
 @aspect_bp.route("/aspect-stream/<int:job_id>")
 def aspect_stream(job_id):
-    if "user_id" not in session:
+
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
-    if job.user_id != session["user_id"]:
+
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
     if not job.output_file or not os.path.exists(job.output_file):
-        abort(404, "Output not ready")
+        abort(404)
 
     return send_file(
         job.output_file,
@@ -244,14 +236,17 @@ def aspect_stream(job_id):
 
 @aspect_bp.route("/aspect-download/<int:job_id>")
 def aspect_download(job_id):
-    if "user_id" not in session:
+
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
-    if job.user_id != session["user_id"]:
+
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
-    output_dir = os.path.join(job.job_dir, "output")
+    if not job.output_file or not os.path.exists(job.output_file):
+        abort(404)
 
     return send_file(
         job.output_file,

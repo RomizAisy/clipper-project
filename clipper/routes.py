@@ -222,24 +222,27 @@ def clipper_download(job_id, filename):
 
 @clipper_bp.route("/clipper-delete/<int:job_id>", methods=["POST"])
 def delete_job(job_id):
-    if "user_id" not in session:
+
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
 
-    # 🔐 Security: only owner can delete
-    if job.user_id != session["user_id"]:
+    # only owner session can delete
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
-    # 📁 Delete files safely
+    # delete files
     if job.job_dir and os.path.exists(job.job_dir):
         shutil.rmtree(job.job_dir, ignore_errors=True)
 
-    # 🗄 Delete DB record
+    # delete DB record
     db.session.delete(job)
     db.session.commit()
 
-    return jsonify({"message": "Job deleted"})
+    return jsonify({
+        "message": "Job deleted"
+    })
 
 
 
