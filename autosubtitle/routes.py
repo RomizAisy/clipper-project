@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 
 import os, tempfile, time, traceback, shutil
 from threading import Thread
+import uuid
 
 from autosubtitle.tasks.autosub_tasks import process_autosubs_background 
 
@@ -26,22 +27,17 @@ autosub_bp = Blueprint("autosub", __name__)
 @autosub_bp.route("/auto-subtitle")
 def autosub_page():
 
+    if "guest_id" not in session:
+        session["guest_id"] = str(uuid.uuid4())
+
     form = AutosubFileForm()
 
-    user_id = session.get("user_id")  # ✅ safe access
-
-    if user_id:
-        jobs = get_user_jobs_with_outputs(user_id)
-        return render_template(
-        "autoSubtitle.html",
-        form=form,
-        jobs=jobs
+    jobs = get_user_jobs_with_outputs(
+        session["guest_id"]
     )
-    else:
-        jobs = []  # guest has no jobs
 
     return render_template(
-        "guestSubtitle.html",
+        "autoSubtitle.html",
         form=form,
         jobs=jobs
     )
@@ -49,10 +45,10 @@ def autosub_page():
 @autosub_bp.route("/add-subtitle", methods = ["POST"])
 def add_subtitle():
     form = AutosubFileForm()
-    user = User.query.get(session["user_id"])
+    
 
-    if "user_id" not in session:
-        return redirect(url_for("auth.register"))
+    if "guest_id" not in session:
+        abort(401)
 
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400
@@ -60,8 +56,6 @@ def add_subtitle():
     if not form.file.data and not form.video_url.data:
         return jsonify({"error": "Upload a file or paste a video link"}), 400
     
-    if not can_start_job(user):
-        return jsonify({"error": "Daily limit reached"}), 403
 
     # Temp Directory
     BASE_TEMP_DIR = os.path.join(os.getcwd(), "uploads", "temp")
@@ -116,7 +110,7 @@ def add_subtitle():
 
     # Now create VideoJob
     job = VideoJob(
-        user_id=user.id,
+        guest_id=session["guest_id"],
         status="processing",
         progress=0,
         step="uploaded",
@@ -174,12 +168,12 @@ def download_from_link(url, job_dir):
 
 @autosub_bp.route("/autosub-status/<int:job_id>")
 def autosub_status(job_id):
-    if "user_id" not in session:
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
 
-    if job.user_id != session["user_id"]:
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
     return jsonify({
@@ -197,11 +191,11 @@ def autosub_thumbnail(job_id):
 
 @autosub_bp.route("/autosub-stream/<int:job_id>")
 def autosub_stream(job_id):
-    if "user_id" not in session:
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
-    if job.user_id != session["user_id"]:
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
     output_dir = os.path.join(job.job_dir, "output")
@@ -218,11 +212,11 @@ def autosub_stream(job_id):
 
 @autosub_bp.route("/autosub-download/<int:job_id>")
 def autosub_download(job_id):
-    if "user_id" not in session:
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
-    if job.user_id != session["user_id"]:
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
     output_dir = os.path.join(job.job_dir, "output")
