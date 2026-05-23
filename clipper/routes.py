@@ -1,5 +1,6 @@
 from .forms import ClipperFileForm
 import os, tempfile,  shutil
+import uuid
 from werkzeug.utils import secure_filename
 
 from flask import Blueprint, render_template, session, jsonify, redirect, url_for, abort, send_from_directory
@@ -9,9 +10,6 @@ from clipper.tasks.clipper_tasks import process_video_background
 
 from helper.preview_download import get_user_clip_with_outputs
 
-
-from helper.daily_usage import can_start_job
-#from helper.calculate_tokens import calculate_required_tokens
 from datetime import date
 
 from flask import json
@@ -28,32 +26,26 @@ clipper_bp = Blueprint("clipper", __name__ )
 @clipper_bp.route("/auto-clipper")
 def auto_clipper():
 
+    if "guest_id" not in session:
+        session["guest_id"] = str(uuid.uuid4())
+
     form = ClipperFileForm()
 
-    user_id = session.get("user_id")  # ✅ safe access
-
-    if user_id:
-        jobs = get_user_clip_with_outputs(user_id)
-        return render_template(
-            "autoClipper.html",
-            form=form,
-            jobs=jobs
-            )
-    else:
-        jobs = []  # guest has no jobs
+    jobs = get_user_clip_with_outputs(
+        session["guest_id"]
+    )
 
     return render_template(
-        "guestClipper.html",
+        "autoClipper.html",
         form=form,
         jobs=jobs
     )
 
-
 @clipper_bp.route('/clipper-video', methods = ["POST"])
 def clipper():
     form = ClipperFileForm()
-    if "user_id" not in session:
-        return redirect(url_for("auth.register"))
+    if "guest_id" not in session:
+        abort(401)
 
     if not form.validate_on_submit():
         return jsonify({"error": "Invalid form"}), 400
@@ -62,11 +54,7 @@ def clipper():
         return jsonify({"error": "Upload a file or paste a video link"}), 400
     
     # Get user
-    user = User.query.get(session["user_id"])
 
-    # SINGLE quota check
-    if not can_start_job(user):
-        return jsonify({"error": "Daily limit reached"}), 403
 
     db.session.commit()
 
@@ -99,7 +87,7 @@ def clipper():
     
     # Now create VideoJob
     job = VideoJob(
-        user_id=user.id,
+        guest_id=session["guest_id"],
         status="processing",
         progress=0,
         step="uploaded",
@@ -158,14 +146,14 @@ def download_from_link(url, job_dir):
 
 @clipper_bp.route("/clipper-status/<int:job_id>")
 def clipper_status(job_id):
-    if "user_id" not in session:
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get(job_id)
     if not job:
         return jsonify({"status": "not_found"}), 404
 
-    if job.user_id != session["user_id"]:
+    if job.user_id != session["guest_id"]:
         abort(403)
 
     return jsonify({
@@ -185,12 +173,12 @@ def clip_thumbnail(job_id, filename):
 
 @clipper_bp.route("/clipper-stream/<int:job_id>/<filename>")
 def clipper_stream(job_id, filename):
-    if "user_id" not in session:
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
 
-    if job.user_id != session["user_id"]:
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
     clips_dir = os.path.join(job.job_dir, "clips")
@@ -203,11 +191,11 @@ def clipper_stream(job_id, filename):
 
 @clipper_bp.route("/clipper-download/<int:job_id>/<filename>")
 def clipper_download(job_id, filename):
-    if "user_id" not in session:
+    if "guest_id" not in session:
         abort(401)
 
     job = VideoJob.query.get_or_404(job_id)
-    if job.user_id != session["user_id"]:
+    if job.guest_id != session["guest_id"]:
         abort(403)
 
     clips_dir = os.path.join(job.job_dir, "clips")

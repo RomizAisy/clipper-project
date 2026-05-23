@@ -3,7 +3,7 @@ import json
 import traceback
 
 from extensions import db
-from models import VideoJob, User
+from models import VideoJob
 
 from clipper.clipper import cut_topic_clips
 from clipper.audio import extract_audio
@@ -22,16 +22,13 @@ def process_video_background(job_id, save_path, job_dir):
     app = get_app()
     with app.app_context():
         job = VideoJob.query.get(job_id)
-        user = User.query.get(job.user_id)
+
 
         
         aspect_ratio = job.aspect_ratio or "original"
         subtitle_style = job.subtitle_style or "default_portrait"
 
-        if not job.usage_charged:
-            user.used_today += 1
-            job.usage_charged = True
-            db.session.commit()
+
         try:
             audio_path = extract_audio(save_path, job_dir)
             job.progress = 25
@@ -181,10 +178,6 @@ def process_video_background(job_id, save_path, job_dir):
 
             job.status = "failed"
             job.step = str(e)
-
-            if job.usage_charged:
-                user.used_today = max(0, user.used_today - 1)
-                job.usage_charged = False
 
             db.session.commit()
             raise   # ⭐ VERY IMPORTANT

@@ -45,10 +45,10 @@ def generate_thumbnail(video_path, job_dir):
 import json
 import os
 
-def get_user_clip_with_outputs(user_id):
+def get_user_clip_with_outputs(guest_id):
     jobs = (
         VideoJob.query
-        .filter_by(user_id=user_id)
+        .filter_by(guest_id=guest_id)
         .order_by(VideoJob.id.desc())
         .all()
     )
